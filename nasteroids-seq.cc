@@ -1,6 +1,7 @@
 #include <iostream>
 #include <fstream>
 #include <string>
+#include <string.h>
 using namespace std;
 
 // Static Params
@@ -31,38 +32,32 @@ void checkNumberArguments(int numberArguments){
   Determinate params are correct and return 
   int array to use them
 --------------------------------------------*/
-unsigned int* checkArguments(char** arguments){
+unsigned int* checkArguments(int argc, char** arguments){
 
     // Check if all argument are numbers
     char *end;
-    strtol(arguments[1], &end, 10);
-    if (*end != '\0') {
-        wrongMessage();
-    }
-    strtol(arguments[2], &end, 10);
-    if (*end != '\0') {
-        wrongMessage();
-    }
-    strtol(arguments[3], &end, 10);
-    if (*end != '\0') {
-        wrongMessage();
-    }
-    strtol(arguments[4], &end, 10);
-    if (*end != '\0') {
-        wrongMessage();
+    for (int i = 1; i < argc; i++){
+        strtol(arguments[i], &end, 10);
+        if (*end != '\0') {
+            wrongMessage();
+        }
     }
 
     // Check if arguments have any negative number
-    if (arguments[0].find('-')) {
-        wrongMessage();
+    for (int i = 1; i < argc; i++){
+        for (unsigned int j = 0; j < strlen(arguments[i]); j++){
+            if (arguments[i][j] == '-'){
+                wrongMessage();
+            }
+        }
     }
 
+    // Define array to return
     unsigned int* argsInt = new unsigned int[4];
     argsInt[0] = std::atoi( arguments[1] );
     argsInt[1] = std::atoi( arguments[2] ); 
     argsInt[2] = std::atoi( arguments[3] );
     argsInt[3] = std::atoi( arguments[4] );
-
 
     return argsInt;
 }
@@ -72,13 +67,9 @@ int main (int argc, char** argv) {
     // Check Number of Arguments
     checkNumberArguments(argc);
 
-    // Check args and return with correct format
-    unsigned int *args = checkArguments(argv);
+    // Check args and return args as unsigned int format
+    unsigned int *args = checkArguments(argc, argv);
 
-    cout << args[0] << "\n";
-    cout << args[1] << "\n";
-    cout << args[2] << "\n";
-    cout << args[3] << "\n";
 
     return 0;
 }
