@@ -4,8 +4,20 @@
 #include <string.h>
 using namespace std;
 
-// Static Params
+//// Static Params
+// Name
 static std::string nameProgram = "nasteroids-seq";
+
+// Math values
+// static float timeIncrement = 0.1;
+// static float minDistance = 2.0;
+// static float spaceWidth = 200;
+// static float spaceHeight = 200;
+// static float m = 1000;
+// static float sdm = 50;
+
+// File Paths
+static std::string pathInitConfig = "init_config.txt";
 
 /*--------------------------------------------
   Print wrong arguments and the correct use
@@ -32,7 +44,7 @@ void checkNumberArguments(int numberArguments){
   Determinate params are correct and return 
   int array to use them
 --------------------------------------------*/
-unsigned int* checkArguments(int argc, char** arguments){
+unsigned int* checkArguments(int argc, char **arguments){
 
     // Check if all argument are numbers
     char *end;
@@ -62,6 +74,39 @@ unsigned int* checkArguments(int argc, char** arguments){
     return argsInt;
 }
 
+/*--------------------------------------------
+  Write the init config in a file
+--------------------------------------------*/
+void writeInitConfig(int argsNumber, unsigned int *argsInt, float **asteroids, float **planets){
+    // Create and ope the file
+    ofstream myfile;
+    myfile.open (pathInitConfig);
+
+    // Write params 
+    for (int i = 0; i < argsNumber; i++){
+        myfile << argsInt[i] << " ";
+    }
+    myfile << "\n";
+
+    // Write asteroids 
+    for (unsigned int i = 0; i < argsInt[0]; i++){
+        for (int j = 0; j < 3; i++){
+            myfile << asteroids[i][j] << " ";
+        }
+    }
+    myfile << "\n";
+
+    // Write planets 
+    for (unsigned int i = 0; i < argsInt[0]; i++){
+        for (int j = 0; j < 3; i++){
+            myfile << planets[i][j] << " ";
+        }
+    }
+    myfile << "\n";
+
+
+    myfile.close();
+}
 
 int main (int argc, char** argv) {
     // Check Number of Arguments
@@ -69,7 +114,6 @@ int main (int argc, char** argv) {
 
     // Check args and return args as unsigned int format
     unsigned int *args = checkArguments(argc, argv);
-
 
     return 0;
 }
