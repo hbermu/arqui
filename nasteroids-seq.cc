@@ -2,6 +2,7 @@
 #include <fstream>
 #include <string>
 #include <string.h>
+#include <math.h>
 #include <random>
 using namespace std;
 
@@ -11,17 +12,19 @@ using namespace std;
 // Name
 static std::string nameProgram = "nasteroids-seq";
 
+// File Paths
+static std::string pathInitConfig = "init_config.txt";
+
 // Math values
+static double gravity = 6.674e-5;
+static double maxForce = 200;
 // static double timeIncrement = 0.1;
 // static double minDistance = 2.0;
 static double spaceWidth = 200;
 static double spaceHeight = 200;
 static double massPlanet = 10;
-// static double m = 1000;
-// static double sdm = 50;
-
-// File Paths
-static std::string pathInitConfig = "init_config.txt";
+static double m = 1000;
+static double sdm = 50;
 
 /////////////
 // Structs //
@@ -29,7 +32,7 @@ static std::string pathInitConfig = "init_config.txt";
 struct star {
   double x;
   double y;
-  double weight;
+  double mass;
 } ;
 
 ///////////////
@@ -39,11 +42,11 @@ struct star {
   Create a new star (planet or asteroid) and
   returns it
 --------------------------------------------*/
-star createStar(double x, double y, double weight){
+star createStar(double x, double y, double mass){
     star s;
     s.x = x;
     s.y = y;
-    s.weight = weight;
+    s.mass = mass;
     return s;
 }
 
@@ -60,7 +63,7 @@ string truncateDouble(double number){
   Return formated string with star values
 --------------------------------------------*/
 string returnStar(star s){
-    return truncateDouble(s.x) + " " + truncateDouble(s.y) + " " + truncateDouble(s.weight);
+    return truncateDouble(s.x) + " " + truncateDouble(s.y) + " " + truncateDouble(s.mass);
 }
 
 /*--------------------------------------------
@@ -151,7 +154,7 @@ star* createStars(unsigned int *argsInt){
     std::default_random_engine re(argsInt[3]);
     std::uniform_real_distribution<double> xdist(0.0, std::nextafter(spaceWidth, std::numeric_limits<double>::max()));
     std::uniform_real_distribution<double> ydist(0.0, std::nextafter(spaceHeight, std::numeric_limits<double>::max()));
-    std::normal_distribution<double> mdist;
+    std::normal_distribution<double> mdist(m, sdm);
     
     // Generate asteroids
     for (unsigned int i = 0; i < argsInt[0]; i++){
@@ -184,11 +187,76 @@ star* createStars(unsigned int *argsInt){
     return stars;
 }
 
+/*--------------------------------------------
+  Return the distance between 2 stars
+--------------------------------------------*/
+double distance(star starA, star starB){
+    // sqr( (xa - xb)² + (ya - yb)² )
+    double x2 = pow((starA.x - starB.x), 2);
+    double y2 = pow((starA.y - starB.y), 2);
+    return sqrt(x2 + y2);
+}
+
+/*--------------------------------------------
+  Return the slope between 2 stars
+--------------------------------------------*/
+double slope(star starA, star starB){
+    // (ya - yb) / (xa - xb) 
+    double x = (starA.x - starB.x);
+    double y = (starA.y - starB.y);
+    double slope = (y / x);
+    
+    // Correct the slope
+    if (slope < -1 || slope > 1){
+        slope = slope - ((int)slope / 1);
+    }
+
+    return slope;
+}
+
+/*--------------------------------------------
+  Return the angle from a distance
+--------------------------------------------*/
+double angle(double slope){
+    return atan(slope);
+}
+
+/*--------------------------------------------
+  Return the force attraction between 
+  2 stars
+--------------------------------------------*/
+double* attractionForce(star starA, star starB){
+    double* forces = new double[2];
+
+    // Calculate the forces
+    double division = (gravity * starA.mass * starB.mass) / pow(distance(starA, starB) ,2);
+    double xForces = division * cos(angle(slope(starA, starB)));
+    double yForces = division * sin(angle(slope(starA, starB)));
+
+    // Check if any value is over 200
+    if (xForces > maxForce){
+        xForces = maxForce;
+    }
+    if (yForces > maxForce){
+        yForces = maxForce;
+    }
+
+    forces[0] = xForces;
+    forces[1] = yForces;
+
+    return forces;
+}
+
 ///////////
 // MAIN //
 //////////
 int main (int argc, char** argv) {
     // Check Number of Arguments
+    //     argv[1] -> asteroids number
+    //     argv[2] -> iterations number
+    //     argv[3] -> planets number
+    //     argv[4] -> seed
+
     checkNumberArguments(argc);
 
     // Check args and return args as unsigned int format
@@ -199,6 +267,9 @@ int main (int argc, char** argv) {
 
     // Write init config to a file
     writeInitConfig(argc, args, allStars);
+
+    // Exec all iterations
+    
 
     return 0;
 }
