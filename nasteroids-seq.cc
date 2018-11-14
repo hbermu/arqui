@@ -2,22 +2,66 @@
 #include <fstream>
 #include <string>
 #include <string.h>
+#include <random>
 using namespace std;
 
-//// Static Params
+///////////////////
+// Static Params //
+///////////////////
 // Name
 static std::string nameProgram = "nasteroids-seq";
 
 // Math values
-// static float timeIncrement = 0.1;
-// static float minDistance = 2.0;
-// static float spaceWidth = 200;
-// static float spaceHeight = 200;
-// static float m = 1000;
-// static float sdm = 50;
+// static double timeIncrement = 0.1;
+// static double minDistance = 2.0;
+static double spaceWidth = 200;
+static double spaceHeight = 200;
+static double massPlanet = 10;
+// static double m = 1000;
+// static double sdm = 50;
 
 // File Paths
 static std::string pathInitConfig = "init_config.txt";
+
+/////////////
+// Structs //
+/////////////
+struct star {
+  double x;
+  double y;
+  double weight;
+} ;
+
+///////////////
+// Functions //
+///////////////
+/*--------------------------------------------
+  Create a new star (planet or asteroid) and
+  returns it
+--------------------------------------------*/
+star createStar(double x, double y, double weight){
+    star s;
+    s.x = x;
+    s.y = y;
+    s.weight = weight;
+    return s;
+}
+
+/*--------------------------------------------
+  Truncate a double with 3 decimals
+--------------------------------------------*/
+string truncateDouble(double number){
+    string numberString = to_string(number);
+    std::size_t found = numberString.find('.');
+    return numberString.substr (0,found + 4); 
+}
+
+/*--------------------------------------------
+  Return formated string with star values
+--------------------------------------------*/
+string returnStar(star s){
+    return truncateDouble(s.x) + " " + truncateDouble(s.y) + " " + truncateDouble(s.weight);
+}
 
 /*--------------------------------------------
   Print wrong arguments and the correct use
@@ -77,43 +121,84 @@ unsigned int* checkArguments(int argc, char **arguments){
 /*--------------------------------------------
   Write the init config in a file
 --------------------------------------------*/
-void writeInitConfig(int argsNumber, unsigned int *argsInt, float **asteroids, float **planets){
+void writeInitConfig(int argsNumber, unsigned int *argsInt, star *stars){
     // Create and ope the file
-    ofstream myfile;
-    myfile.open (pathInitConfig);
+    ofstream myFile;
+    myFile.open (pathInitConfig);
 
     // Write params 
-    for (int i = 0; i < argsNumber; i++){
-        myfile << argsInt[i] << " ";
+    for (int i = 0; i < argsNumber - 1; i++){
+        myFile << argsInt[i] << " ";
     }
-    myfile << "\n";
+    myFile << "\n";
 
-    // Write asteroids 
-    for (unsigned int i = 0; i < argsInt[0]; i++){
-        for (int j = 0; j < 3; i++){
-            myfile << asteroids[i][j] << " ";
-        }
+    // Write all stars 
+    for (unsigned int i = 0; i < argsInt[0] + argsInt[2]; i++){
+        myFile << returnStar(stars[i]) << "\n";
     }
-    myfile << "\n";
 
-    // Write planets 
-    for (unsigned int i = 0; i < argsInt[0]; i++){
-        for (int j = 0; j < 3; i++){
-            myfile << planets[i][j] << " ";
-        }
-    }
-    myfile << "\n";
-
-
-    myfile.close();
+    myFile.close();
 }
 
+/*--------------------------------------------
+  Generate random asteroids params
+--------------------------------------------*/
+star* createStars(unsigned int *argsInt){
+    // Create list of stars
+    star* stars = new star[argsInt[0] + argsInt[2]];
+
+    // Generate random fuctions with the seed
+    std::default_random_engine re(argsInt[3]);
+    std::uniform_real_distribution<double> xdist(0.0, std::nextafter(spaceWidth, std::numeric_limits<double>::max()));
+    std::uniform_real_distribution<double> ydist(0.0, std::nextafter(spaceHeight, std::numeric_limits<double>::max()));
+    std::normal_distribution<double> mdist;
+    
+    // Generate asteroids
+    for (unsigned int i = 0; i < argsInt[0]; i++){
+        stars[i] = createStar(xdist(re), ydist(re), mdist(re));
+    }
+
+    // Variable to know where put the planet 
+    int order = 0;
+    // Generate planets
+    for (unsigned int i = 0; i < argsInt[2]; i++){
+        switch ( order ){  
+            case 0:
+                stars[i + argsInt[0]] = createStar(0, ydist(re), mdist(re) * massPlanet);
+                order = order +1;
+                break;  
+            case 1:
+                stars[i + argsInt[0]] = createStar(xdist(re),spaceHeight, mdist(re) * massPlanet);
+                order = order +1;
+                break; 
+            case 2:
+                stars[i + argsInt[0]] = createStar(spaceWidth, ydist(re), mdist(re) * massPlanet);
+                order = order +1;
+                break;
+            default:
+              stars[i + argsInt[0]] = createStar(xdist(re), 0, mdist(re) * massPlanet);
+              order = 0;
+        }
+    }
+
+    return stars;
+}
+
+///////////
+// MAIN //
+//////////
 int main (int argc, char** argv) {
     // Check Number of Arguments
     checkNumberArguments(argc);
 
     // Check args and return args as unsigned int format
     unsigned int *args = checkArguments(argc, argv);
+
+    // Generate all stars (asteroids and planets)
+    star* allStars = createStars(args);
+
+    // Write init config to a file
+    writeInitConfig(argc, args, allStars);
 
     return 0;
 }
