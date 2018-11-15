@@ -14,12 +14,13 @@ static std::string nameProgram = "nasteroids-seq";
 
 // File Paths
 static std::string pathInitConfig = "init_config.txt";
+static std::string pathOutFile = "out.txt";
 
 // Math values
 static double gravity = 6.674e-5;
 static double maxForce = 200;
-// static double timeIncrement = 0.1;
-// static double minDistance = 2.0;
+static double timeIncrement = 0.1;
+static double minDistance = 2.0;
 static double spaceWidth = 200;
 static double spaceHeight = 200;
 static double massPlanet = 10;
@@ -30,10 +31,17 @@ static double sdm = 50;
 // Structs //
 /////////////
 struct star {
-  double x;
-  double y;
-  double mass;
-} ;
+    double x;
+    double y;
+    double mass;
+    double velocityX;
+    double velocityY;
+};
+
+struct force {
+    double x;
+    double y;
+};
 
 ///////////////
 // Functions //
@@ -47,7 +55,19 @@ star createStar(double x, double y, double mass){
     s.x = x;
     s.y = y;
     s.mass = mass;
+    s.velocityX = 0;
+    s.velocityY = 0;
     return s;
+}
+
+/*--------------------------------------------
+  Create a new force and returns it
+--------------------------------------------*/
+force createForce(double x, double y){
+    force m;
+    m.x = x;
+    m.y = y;
+    return m;
 }
 
 /*--------------------------------------------
@@ -64,6 +84,11 @@ string truncateDouble(double number){
 --------------------------------------------*/
 string returnStar(star s){
     return truncateDouble(s.x) + " " + truncateDouble(s.y) + " " + truncateDouble(s.mass);
+}
+
+string returnAsteroid(star s){
+    return  truncateDouble(s.x) + " " + truncateDouble(s.y) + " " + 
+            truncateDouble(s.velocityX) + " " + truncateDouble(s.velocityY) + " " + truncateDouble(s.mass);
 }
 
 /*--------------------------------------------
@@ -124,13 +149,13 @@ unsigned int* checkArguments(int argc, char **arguments){
 /*--------------------------------------------
   Write the init config in a file
 --------------------------------------------*/
-void writeInitConfig(int argsNumber, unsigned int *argsInt, star *stars){
-    // Create and ope the file
+void writeInitConfig(int argc, unsigned int *argsInt, star *stars){
+    // Create and open the file
     ofstream myFile;
     myFile.open (pathInitConfig);
 
     // Write params 
-    for (int i = 0; i < argsNumber - 1; i++){
+    for (int i = 0; i < argc - 1; i++){
         myFile << argsInt[i] << " ";
     }
     myFile << "\n";
@@ -138,6 +163,19 @@ void writeInitConfig(int argsNumber, unsigned int *argsInt, star *stars){
     // Write all stars 
     for (unsigned int i = 0; i < argsInt[0] + argsInt[2]; i++){
         myFile << returnStar(stars[i]) << "\n";
+    }
+
+    myFile.close();
+}
+
+void writeOutFIle(unsigned int *argsInt, star *stars){
+    // Create and ope the file
+    ofstream myFile;
+    myFile.open (pathOutFile);
+
+    // Write all asteroids 
+    for (unsigned int i = 0; i < argsInt[0]; i++){
+        myFile << returnAsteroid(stars[i]) << "\n";
     }
 
     myFile.close();
@@ -171,7 +209,7 @@ star* createStars(unsigned int *argsInt){
                 order = order +1;
                 break;  
             case 1:
-                stars[i + argsInt[0]] = createStar(xdist(re),spaceHeight, mdist(re) * massPlanet);
+                stars[i + argsInt[0]] = createStar(xdist(re), 0, mdist(re) * massPlanet);
                 order = order +1;
                 break; 
             case 2:
@@ -179,7 +217,7 @@ star* createStars(unsigned int *argsInt){
                 order = order +1;
                 break;
             default:
-              stars[i + argsInt[0]] = createStar(xdist(re), 0, mdist(re) * massPlanet);
+              stars[i + argsInt[0]] = createStar(xdist(re), spaceHeight, mdist(re) * massPlanet);
               order = 0;
         }
     }
@@ -223,10 +261,9 @@ double angle(double slope){
 
 /*--------------------------------------------
   Return the force attraction between 
-  2 stars
+  2 stars: A -> B
 --------------------------------------------*/
-double* attractionForce(star starA, star starB){
-    double* forces = new double[2];
+force attractionForce(star starA, star starB){
 
     // Calculate the forces
     double division = (gravity * starA.mass * starB.mass) / pow(distance(starA, starB) ,2);
@@ -241,10 +278,126 @@ double* attractionForce(star starA, star starB){
         yForces = maxForce;
     }
 
-    forces[0] = xForces;
-    forces[1] = yForces;
+    force forces = createForce(xForces, yForces);
 
     return forces;
+}
+
+/*--------------------------------------------
+  Calculate the star force
+--------------------------------------------*/
+star calculateNewPosition(star s, force forces){
+    // Calculate aceleration
+    double acelerationX = forces.x / s.mass;
+    double acelerationY = forces.y / s.mass;
+
+    // Calculate velocity
+    s.velocityX = s.velocityX + (acelerationX * timeIncrement);
+    s.velocityY = s.velocityY + (acelerationY * timeIncrement);
+
+    // Calculate the new position
+    s.x = s.x + (s.velocityX * timeIncrement);
+    s.y = s.y + (s.velocityY * timeIncrement);
+
+    // Return the star with the new position
+    return s;
+}
+
+/*--------------------------------------------
+  Do an iteration when the distance is 
+  under minDistance with an asteroids
+--------------------------------------------*/
+star* asteroidColision(star starA, star starB){
+    // Generate new array
+    star* stars = new star[2];
+
+    // Save the asteroids
+    stars[0] = starA;
+    stars[1] = starB;
+
+    // Change velocity
+    stars[0].velocityX = starB.velocityX;
+    stars[0].velocityY = starB.velocityY;
+    stars[1].velocityX = starA.velocityX;
+    stars[1].velocityY = starA.velocityY;
+
+    // Return stars lists
+    return stars;
+}
+
+/*--------------------------------------------
+  Check if an asteroid is too near to the 
+  border
+--------------------------------------------*/
+star* checkBorder(unsigned int *argsInt, star* allStars){
+    for (unsigned int i = 0; i < argsInt[0] - 1; i++){
+        if (allStars[i].x < minDistance){
+            allStars[i].x = minDistance;
+            allStars[i].velocityX = allStars[i].velocityX * (-1);
+        }
+        if (allStars[i].y < minDistance){
+            allStars[i].y = minDistance;
+            allStars[i].velocityY = allStars[i].velocityY * (-1);
+        }
+    }
+
+    return allStars;
+}
+
+/*--------------------------------------------
+  Do one iteration and depent for the
+  distance call the correct fuction
+--------------------------------------------*/
+star* iteration(unsigned int *argsInt, star* allStars){
+
+    // Array with all asteroid forces all create any forces with 0
+    force* forces = new force[argsInt[0]];
+    for (unsigned int i = 0; i < argsInt[0]; i++){
+        forces[i] = createForce(0, 0);
+    }
+
+    // Calculate the forces
+    for (unsigned int i = 0; i < argsInt[0]; i++){
+        for (unsigned int j = i +1; j < (argsInt[0] + argsInt[2]); j++){
+            // Get the distance to decide
+            double dista = distance(allStars[i], allStars[j]);
+
+            if (dista > minDistance){
+                force f = attractionForce(allStars[i], allStars[j]);
+                // Only save the force if the star is a asteroid
+                forces[i] = createForce((forces[i].x + f.x), (forces[i].y + f.y));
+                if (j < argsInt[0]){
+                    forces[j] = createForce((forces[j].x + (-1 * f.x)), (forces[j].y + (-1 * f.y)));
+                }
+            }
+        }
+    }
+
+    // Calculate the new position for asteroids
+    for (unsigned int i = 0; i < argsInt[0]; i++){
+        allStars[i] = calculateNewPosition(allStars[i], forces[i]);
+    }
+
+    // Check if any asteroid is in the space border
+    allStars = checkBorder(argsInt, allStars);
+
+    // If any astroid ricochets with other asteroid
+    for (unsigned int i = 0; i < argsInt[0]; i++){
+        for (unsigned int j = i +1; j < (argsInt[0]); j++){
+            // Get the distance to decide
+            double dista = distance(allStars[i], allStars[j]);
+
+            if (dista <= minDistance){
+                star* asteroids = asteroidColision(allStars[i], allStars[j]);
+                allStars[i] = asteroids[0];
+                allStars[i] = asteroids[1];
+            }
+        }
+    }
+
+    // Return all stars with their new positions
+    return allStars;
+
 }
 
 ///////////
@@ -269,7 +422,12 @@ int main (int argc, char** argv) {
     writeInitConfig(argc, args, allStars);
 
     // Exec all iterations
-    
+    for (unsigned int i = 0; i < args[1]; i++){
+        allStars = iteration(args, allStars);
+    }
+
+    // Write final states to a file
+    writeOutFIle(args, allStars);
 
     return 0;
 }
