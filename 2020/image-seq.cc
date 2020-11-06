@@ -13,9 +13,6 @@ namespace fs = experimental::filesystem;
 // Name
 const char *name_program = "image-seq";
 
-// File Paths
-//static string pathInitConfig = "-";
-
 // Program Functions
 const char *program_functions[3] = {"copy", "gauss", "sobel"};
 
@@ -153,6 +150,17 @@ void function_copy(const vector<string>& images_paths, const char *path_destinat
 
 }
 
+/// <summary>Apply gauss function to all images and save them</summary>
+/// <param name="images_paths">Vector with all images paths</param>
+/// <param name="path_destination">Destination path</param>
+/// /// <returns></returns>
+void function_gauss(const vector<string>& images_paths, const char *path_destination){
+
+
+
+
+}
+
 ///////////
 // MAIN //
 //////////
@@ -160,10 +168,11 @@ int main (int argc, char** argv) {
 
     check_arguments(argc, argv);
 
-    vector<string> imagesPaths = get_images_paths(argv[2]);
-
     if (strcmp(argv[1],"copy") == 0){
-        function_copy(imagesPaths, argv[3]);
+        function_copy(get_images_paths(argv[2]), argv[3]);
+    }
+    if (strcmp(argv[1],"gauss") == 0){
+        function_gauss(get_images_paths(argv[2]), argv[3]);
     }
     return 0;
 
