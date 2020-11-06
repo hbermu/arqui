@@ -14,4 +14,4 @@ image-seq-nop: $(OBJ)-seq.cc
 	$(CC) -o $(OBJ)-seq-nop $(OBJ)-seq.cc $(CFLAGS) $(CFLAGSNOP) -lstdc++fs
 
 clean:
-	rm -f image-seq image-seq-nop
+	rm -f image-seq image-seq-nop images_destination/*.bmp

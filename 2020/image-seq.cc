@@ -11,13 +11,13 @@ namespace fs = experimental::filesystem;
 // Static Params //
 ///////////////////
 // Name
-const char *nameProgram = "image-seq";
+const char *name_program = "image-seq";
 
 // File Paths
 //static string pathInitConfig = "-";
 
 // Program Functions
-const char *programFunctions[3] = { "copy", "gauss", "sobel"};
+const char *program_functions[3] = {"copy", "gauss", "sobel"};
 
 /////////////
 // Structs //
@@ -31,48 +31,53 @@ const char *programFunctions[3] = { "copy", "gauss", "sobel"};
 /// <summary>Print error and exit program</summary>
 /// <param name="message">String to print</param>
 /// <returns></returns>
-void wrongMessage(const char *message){
-    cout    << message << "\n"
-            << "  " << nameProgram << " operation in_path out_path:\n"
+void wrong_message(const char *message){
+
+    cout << message << "\n"
+         << "  " << name_program << " operation in_path out_path:\n"
             << "    operation: copy, gauss, sobel\n";
     exit(-1);
+
 }
 
 /// <summary>Check number of arguments</summary>
 /// <param name="argc">Number of arguments</param>
 /// <returns></returns>
-void checkArgumentsNumber(int argc){
+void check_arguments_number(int argc){
+
     if (argc != 4){
         const char *message = "Wrong format:";
-        wrongMessage(message);
+        wrong_message(message);
     }
+
 }
 
 /// <summary>Check function parsed</summary>
 /// <param name="argc">Function Argument</param>
 /// <returns></returns>
-void checkArgumentsFunctionName(const char *function){
-    bool rightFunction = false;
-    // const int functionsSize = (sizeof(programFunctions)/sizeof(programFunctions[0]));
+void check_arguments_function_name(const char *function){
+
+    bool right_function = false;
+    // const int functionsSize = (sizeof(program_functions)/sizeof(program_functions[0]));
     // for (int i = 0; i < functionsSize; i++){
-    for (auto & programFunction : programFunctions){
-        if (strcmp(function,programFunction) == 0){
-            rightFunction = true;
+    for (auto & program_function : program_functions){
+        if (strcmp(function, program_function) == 0){
+            right_function = true;
         }
     }
-    if (!rightFunction){
-        string messageError = "Unexpected operation: ";
-        messageError += function;
-        const char *message = messageError.c_str();
-        wrongMessage(message);
-
+    if (!right_function){
+        string message_error = "Unexpected operation: ";
+        message_error += function;
+        const char *message = message_error.c_str();
+        wrong_message(message);
     }
+
 }
 
 /// <summary>Check if the path exists</summary>
 /// <param name="path">Path to check</param>
 /// <returns>Boolean with false if wrong path or true if right path</returns>
-bool pathExists(const char *path){
+bool path_exists(const char *path){
 
     struct stat info{};
     int statRC = stat( path, &info );
@@ -83,25 +88,26 @@ bool pathExists(const char *path){
         return -1;
     }
     return (info.st_mode & S_IFDIR) != 0;
+
 }
 
 /// <summary>Check paths to read and write</summary>
-/// <param name="pathSource">Source path</param>
-/// <param name="pathDestination">Destination path</param>
+/// <param name="path_source">Source path</param>
+/// <param name="path_destination">Destination path</param>
 /// <returns></returns>
-void checkArgumentsPaths(const char *pathSource, const char *pathDestination){
+void check_arguments_paths(const char *path_source, const char *path_destination){
 
-    if (!pathExists(pathSource)){
-        string message = string("Input path: ") + pathSource + string("\n");
-        message += string("Output path: ") + pathDestination + string("\n");
-        message += string("Cannot open directory [") + pathSource + string("]");
-        wrongMessage(message.c_str());
+    if (!path_exists(path_source)){
+        string message = string("Input path: ") + path_source + string("\n");
+        message += string("Output path: ") + path_destination + string("\n");
+        message += string("Cannot open directory [") + path_source + string("]");
+        wrong_message(message.c_str());
     }
-    if (!pathExists(pathDestination)){
-        string message = string("Input path: ") + pathSource + string("\n");
-        message += string("Output path: ") + pathDestination + string("\n");
-        message += string("Output directory [") + pathDestination + string("] does not exist");
-        wrongMessage(message.c_str());
+    if (!path_exists(path_destination)){
+        string message = string("Input path: ") + path_source + string("\n");
+        message += string("Output path: ") + path_destination + string("\n");
+        message += string("Output directory [") + path_destination + string("] does not exist");
+        wrong_message(message.c_str());
     }
 
 }
@@ -110,38 +116,39 @@ void checkArgumentsPaths(const char *pathSource, const char *pathDestination){
 /// <param name="argc">Program arguments number</param>
 /// <param name="arguments">Program arguments</param>
 /// <returns></returns>
-void checkArguments(int argc, char **argv){
-    checkArgumentsNumber(argc);
+void check_arguments(int argc, char **argv){
 
-    checkArgumentsFunctionName(argv[1]);
+    check_arguments_number(argc);
 
-    checkArgumentsPaths(argv[2], argv[3]);
+    check_arguments_function_name(argv[1]);
+
+    check_arguments_paths(argv[2], argv[3]);
 
 }
 
 /// <summary>Get BMP images Paths</summary>
 /// <param name="path">Path to search the images</param>
 /// <returns>Vector with all paths</returns>
-vector<string> getImagesPaths(const char *path){
+vector<string> get_images_paths(const char *path){
 
-    vector<string> imagesPathsVector;
+    vector<string> images_paths_vector;
     for (const auto & entry : fs::directory_iterator(path)){
         if (string(entry.path()).find(string(".bmp")) != string::npos) {
-            imagesPathsVector.push_back( entry.path().string() );
+            images_paths_vector.push_back(entry.path().string() );
         }
     }
-    return imagesPathsVector;
+    return images_paths_vector;
+
 }
 
 /// <summary>Copy all images from source to destination</summary>
-/// <param name="imagesPaths">Vector with all images paths</param>
-/// <param name="pathDestination">Destination path</param>
+/// <param name="images_paths">Vector with all images paths</param>
+/// <param name="path_destination">Destination path</param>
 /// /// <returns></returns>
-void checkArguments(const vector<string>& imagesPaths, const char *pathDestination){
+void function_copy(const vector<string>& images_paths, const char *path_destination){
 
-    for(const string& imagePath : imagesPaths){
-        
-        fs::copy(imagePath,pathDestination);
+    for(const string& imagePath : images_paths){
+        fs::copy(imagePath, path_destination);
     }
 
 }
@@ -150,13 +157,14 @@ void checkArguments(const vector<string>& imagesPaths, const char *pathDestinati
 // MAIN //
 //////////
 int main (int argc, char** argv) {
-    checkArguments(argc, argv);
 
-    vector<string> imagesPaths = getImagesPaths(argv[2]);
+    check_arguments(argc, argv);
+
+    vector<string> imagesPaths = get_images_paths(argv[2]);
 
     if (strcmp(argv[1],"copy") == 0){
-        checkArguments(imagesPaths, argv[3]);
+        function_copy(imagesPaths, argv[3]);
     }
-
     return 0;
+
 }
