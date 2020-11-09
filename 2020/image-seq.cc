@@ -19,7 +19,15 @@ const char *program_functions[3] = {"copy", "gauss", "sobel"};
 /////////////
 // Structs //
 /////////////
-
+struct bmp_pixel {
+    unsigned char red;
+    unsigned char blue;
+    unsigned char green;
+};
+struct bmp_image {
+    unsigned char info[54];
+    vector <vector<bmp_pixel> > data;
+};
 
 ///////////////
 // Functions //
@@ -142,22 +150,103 @@ vector<string> get_images_paths(const char *path){
 /// <param name="images_paths">Vector with all images paths</param>
 /// <param name="path_destination">Destination path</param>
 /// /// <returns></returns>
-void function_copy(const vector<string>& images_paths, const char *path_destination){
+//void function_copy(const vector<string>& images_paths, const char *path_destination){
+//
+//    for(const string& image_path : images_paths){
+//        fs::copy(image_path, path_destination);
+//    }
+//    open_images(images_paths);
+//
+//}
 
-    for(const string& imagePath : images_paths){
-        fs::copy(imagePath, path_destination);
+/// <summary>Check if BPM can be processed</summary>
+/// <param name="images_paths">Image info</param>
+/// <returns>Boolean with false if wrong image or true if right image info</returns>
+bool can_process_image(const unsigned char image_info[54]){
+
+    // Wrong number of planes
+    if (*(short int*)&image_info[26] != 1)
+        return false;
+
+    // Wrong points size
+    if (*(short int*)&image_info[28] != 24)
+        return false;
+
+    // Wrong Compression
+    if (*(int*)&image_info[30] != 0)
+        return false;
+
+    return true;
+
+}
+
+/// <summary>Open BMP images</summary>
+/// <param name="images_paths">Vector with all images paths</param>
+/// <returns></returns>
+vector<bmp_image> open_images(const vector<string>& images_paths){
+
+    vector<bmp_image> images;
+
+    for(const string& image_path : images_paths){
+
+        bmp_image image{};
+
+        // Open the image (read a binary file: rb)
+        FILE* image_file = fopen(image_path.c_str(), "rb");
+
+        // Read BMP header
+        if (fread(image.info, sizeof(unsigned char), 54, image_file) != 54)
+            exit(-1);
+
+        // If the image can be processes
+        if (can_process_image(image.info)){
+            int image_width = *(int*)&image.info[18];
+            int image_height = *(int*)&image.info[22];
+            int image_size = 3 * image_width * image_height;
+            unsigned char* image_data = new unsigned char[image_size];
+
+            // Read the data (without header)
+            if (fread(image_data, sizeof(unsigned char), image_size, image_file) != (unsigned)image_size)
+                exit(-1);
+            // Close the image
+            fclose(image_file);
+
+            // Create the image
+            for(int i = 0; i < image_height; i += 1){
+                vector<bmp_pixel> data_line;
+                for(int j = 0; j < image_width*3; j += 3){
+                    // B - G - R
+                    bmp_pixel pixel{};
+                    pixel.blue = i + j;
+                    pixel.green = i + j +1;
+                    pixel.red = i + j +2;
+                    data_line.push_back(pixel);
+                }
+                image.data.push_back(data_line);
+            }
+        }
+        images.push_back(image);
     }
+
+    return images;
 
 }
 
 /// <summary>Apply gauss function to all images and save them</summary>
 /// <param name="images_paths">Vector with all images paths</param>
 /// <param name="path_destination">Destination path</param>
-/// /// <returns></returns>
-void function_gauss(const vector<string>& images_paths, const char *path_destination){
+/// <returns></returns>
+//void function_gauss(const vector<string>& images_paths, const char *path_destination){
+//
+//
+//}
 
+void function_copy(const vector<string>& images_paths, const char *path_destination){
 
-
+    for(const string& image_path : images_paths){
+        fs::copy(image_path, path_destination);
+    }
+    open_images(images_paths);
 
 }
 
@@ -171,9 +260,9 @@ int main (int argc, char** argv) {
     if (strcmp(argv[1],"copy") == 0){
         function_copy(get_images_paths(argv[2]), argv[3]);
     }
-    if (strcmp(argv[1],"gauss") == 0){
-        function_gauss(get_images_paths(argv[2]), argv[3]);
-    }
+//    if (strcmp(argv[1],"gauss") == 0){
+//        function_gauss(get_images_paths(argv[2]), argv[3]);
+//    }
     return 0;
 
 }
