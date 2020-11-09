@@ -25,8 +25,10 @@ struct bmp_pixel {
     unsigned char green;
 };
 struct bmp_image {
+    string name;
     unsigned char info[54];
     vector <vector<bmp_pixel> > data;
+    vector <unsigned  char> footer;
 };
 
 ///////////////
@@ -64,8 +66,8 @@ void check_arguments_function_name(const char *function){
 
     bool right_function = false;
     // const int functionsSize = (sizeof(program_functions)/sizeof(program_functions[0]));
-    // for (int i = 0; i < functionsSize; i++){
-    for (auto & program_function : program_functions){
+    // for(int i = 0; i < functionsSize; i++){
+    for(auto & program_function : program_functions){
         if (strcmp(function, program_function) == 0){
             right_function = true;
         }
@@ -137,7 +139,7 @@ void check_arguments(int argc, char **argv){
 vector<string> get_images_paths(const char *path){
 
     vector<string> images_paths_vector;
-    for (const auto & entry : fs::directory_iterator(path)){
+    for(const auto & entry : fs::directory_iterator(path)){
         if (string(entry.path()).find(string(".bmp")) != string::npos) {
             images_paths_vector.push_back(entry.path().string() );
         }
@@ -150,14 +152,13 @@ vector<string> get_images_paths(const char *path){
 /// <param name="images_paths">Vector with all images paths</param>
 /// <param name="path_destination">Destination path</param>
 /// /// <returns></returns>
-//void function_copy(const vector<string>& images_paths, const char *path_destination){
-//
-//    for(const string& image_path : images_paths){
-//        fs::copy(image_path, path_destination);
-//    }
-//    open_images(images_paths);
-//
-//}
+void function_copy(const vector<string>& images_paths, const char *path_destination){
+
+    for(const string& image_path : images_paths){
+        fs::copy(image_path, path_destination);
+    }
+
+}
 
 /// <summary>Check if BPM can be processed</summary>
 /// <param name="images_paths">Image info</param>
@@ -180,10 +181,10 @@ bool can_process_image(const unsigned char image_info[54]){
 
 }
 
-/// <summary>Open BMP images</summary>
+/// <summary>Read BMP images</summary>
 /// <param name="images_paths">Vector with all images paths</param>
-/// <returns></returns>
-vector<bmp_image> open_images(const vector<string>& images_paths){
+/// <returns>Vector with all images</returns>
+vector<bmp_image> read_images(const vector<string>& images_paths){
 
     vector<bmp_image> images;
 
@@ -194,6 +195,10 @@ vector<bmp_image> open_images(const vector<string>& images_paths){
         // Open the image (read a binary file: rb)
         FILE* image_file = fopen(image_path.c_str(), "rb");
 
+        // Get the file name
+        fs::path image_path_filesystem(image_path.c_str());
+        image.name = image_path_filesystem.filename().string();
+
         // Read BMP header
         if (fread(image.info, sizeof(unsigned char), 54, image_file) != 54)
             exit(-1);
@@ -201,30 +206,39 @@ vector<bmp_image> open_images(const vector<string>& images_paths){
         // If the image can be processes
         if (can_process_image(image.info)){
             int image_width = *(int*)&image.info[18];
+            int row_padded = (image_width*3 + 3) & (~3);
             int image_height = *(int*)&image.info[22];
-            int image_size = 3 * image_width * image_height;
-            unsigned char* image_data = new unsigned char[image_size];
 
-            // Read the data (without header)
-            if (fread(image_data, sizeof(unsigned char), image_size, image_file) != (unsigned)image_size)
-                exit(-1);
-            // Close the image
-            fclose(image_file);
+            unsigned char* image_data_row = new unsigned char[row_padded];
 
             // Create the image
             for(int i = 0; i < image_height; i += 1){
+                // Read a image row
+                if (fread(image_data_row, sizeof(unsigned char), row_padded, image_file) != (unsigned)row_padded)
+                    exit(-1);
                 vector<bmp_pixel> data_line;
                 for(int j = 0; j < image_width*3; j += 3){
                     // B - G - R
                     bmp_pixel pixel{};
-                    pixel.blue = i + j;
-                    pixel.green = i + j +1;
-                    pixel.red = i + j +2;
+                    pixel.blue = image_data_row[j];
+                    pixel.green = image_data_row[j + 1];
+                    pixel.red = image_data_row[j + 2];
                     data_line.push_back(pixel);
                 }
                 image.data.push_back(data_line);
             }
+
+            // Read the image footer
+            unsigned char* buffer = new unsigned char[4];
+            while (fread(buffer, 1, 4, image_file) == 4){
+                image.footer.push_back(buffer[0]);
+                image.footer.push_back(buffer[1]);
+                image.footer.push_back(buffer[2]);
+                image.footer.push_back(buffer[3]);
+            }
         }
+        // Close the image
+        fclose(image_file);
         images.push_back(image);
     }
 
@@ -232,21 +246,57 @@ vector<bmp_image> open_images(const vector<string>& images_paths){
 
 }
 
+/// <summary>Write BMP images</summary>
+/// <param name="images">Vector with all images</param>
+/// <param name="path_destination">Destination path</param>
+/// <returns></returns>
+void write_images(const vector<bmp_image>& images, const char *path_destination){
+
+    for(const bmp_image& image : images){
+        // Open the image (read and write a binary file: rwb)
+        string image_path = path_destination + string("/") + image.name;
+        FILE* image_file = fopen(image_path.c_str(), "wb");
+
+        // Write the bmp metadata
+        fwrite(image.info, sizeof(unsigned char), 54, image_file);
+
+        int image_width = *(int*)&image.info[18];
+        int row_padded = (image_width*3 + 3) & (~3);
+        int image_height = *(int*)&image.info[22];
+
+        unsigned char* image_data_row = new unsigned char[row_padded];
+
+        for(int i = 0; i < image_height; i += 1){
+            for(int j = 0; j < image_width; j += 1){
+                image_data_row[(j*3)] = image.data[i][j].blue;
+                image_data_row[(j*3) + 1] = image.data[i][j].green;
+                image_data_row[(j*3) + 2] = image.data[i][j].red;
+            }
+            // Write the data
+            fwrite(image_data_row, sizeof(unsigned char), row_padded, image_file);
+        }
+        // Write the image footer
+        unsigned char* image_footer = new unsigned char[image.footer.size()];
+        for(int i = 0; i < (int)image.footer.size(); i += 1){
+            image_footer[i] = image.footer[i];
+        }
+        fwrite(image_footer, sizeof(unsigned char), 1, image_file);
+
+        // Close the image
+        fclose(image_file);
+    }
+
+}
+
 /// <summary>Apply gauss function to all images and save them</summary>
 /// <param name="images_paths">Vector with all images paths</param>
 /// <param name="path_destination">Destination path</param>
 /// <returns></returns>
-//void function_gauss(const vector<string>& images_paths, const char *path_destination){
-//
-//
-//}
+void function_gauss(const vector<string>& images_paths, const char *path_destination){
 
-void function_copy(const vector<string>& images_paths, const char *path_destination){
+    vector<bmp_image> images = read_images(images_paths);
 
-    for(const string& image_path : images_paths){
-        fs::copy(image_path, path_destination);
-    }
-    open_images(images_paths);
+    write_images(images, path_destination);
 
 }
 
@@ -260,9 +310,9 @@ int main (int argc, char** argv) {
     if (strcmp(argv[1],"copy") == 0){
         function_copy(get_images_paths(argv[2]), argv[3]);
     }
-//    if (strcmp(argv[1],"gauss") == 0){
-//        function_gauss(get_images_paths(argv[2]), argv[3]);
-//    }
+    if (strcmp(argv[1],"gauss") == 0){
+        function_gauss(get_images_paths(argv[2]), argv[3]);
+    }
     return 0;
 
 }
