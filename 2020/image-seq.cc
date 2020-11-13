@@ -180,21 +180,27 @@ vector<string> get_images_paths(const char *path){
 /// <summary>Check if BPM can be processed</summary>
 /// <param name="images_paths">Image info</param>
 /// <returns>Boolean with false if wrong image or true if right image info</returns>
-bool can_process_image(const unsigned char image_info[54]){
+bool can_process_image(const unsigned char image_info[54], const string& image_path){
 
     // Wrong number of planes
     if (*(short int*)&image_info[26] != 1){
-        wrong_message("Planes is not 1");
+        cout << "File: \"" << image_path << "\"" << endl;
+        cout << "Planes is not 1" << endl;
+        return false;
     }
 
     // Wrong points size
     if (*(short int*)&image_info[28] != 24){
-        wrong_message("Points size is not 24");
+        cout << "File: \"" << image_path << "\"" << endl;
+        cout << "Points size is not 24" << endl;
+        return false;
     }
 
     // Wrong Compression
     if (*(int*)&image_info[30] != 0){
-        wrong_message("Image is compressed");
+        cout << "File: \"" << image_path << "\"" << endl;
+        cout << "Image is compressed" << endl;
+        return false;
     }
 
     return true;
@@ -226,7 +232,7 @@ vector<bmp_image> read_images(const vector<string>& images_paths){
             exit(-1);
 
         // If the image can be processes
-        if (can_process_image(image.info)){
+        if (can_process_image(image.info,image_path)){
             int image_width = *(int*)&image.info[18];
             int row_padded = (image_width*3 + 3) & (~3);
             int image_height = *(int*)&image.info[22];
@@ -256,12 +262,12 @@ vector<bmp_image> read_images(const vector<string>& images_paths){
                 }
                 image.data.push_back(data_line);
             }
-        }
-        // Close the image
-        fclose(image_file);
+            // Close the image
+            fclose(image_file);
 
-        image.time_read = chrono::duration_cast<std::chrono::microseconds>(chrono::high_resolution_clock::now() - t1);
-        images.push_back(image);
+            image.time_read = chrono::duration_cast<std::chrono::microseconds>(chrono::high_resolution_clock::now() - t1);
+            images.push_back(image);
+        }
     }
 
     return images;
@@ -314,7 +320,7 @@ void write_images(const vector<bmp_image>& images, const char *path_destination)
             total_time += image.time_sobel.count();
 
         // Print times
-        cout << "File: \"" << image.path << "\"(time : " << total_time << ")" <<endl;
+        cout << "File: \"" << image.path << "\"(time: " << total_time << ")" <<endl;
         cout << "  Load time: " << image.time_read.count() << endl;
         if(image.time_gauss.count() != 0)
             cout << "  Gauss time: " << image.time_gauss.count() << endl;
