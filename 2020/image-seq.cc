@@ -16,6 +16,16 @@ const char *name_program = "image-seq";
 // Program Functions
 const char *program_functions[3] = {"copy", "gauss", "sobel"};
 
+// Gauss params
+const unsigned short int gauss_mask[5][5] = {
+            {1, 4,  7,  4,  1} ,
+            {4, 16, 26, 16, 4} ,
+            {7, 26, 41, 26, 7} ,
+            {4, 16, 26, 16, 4} ,
+            {1, 4,  7,  4,  1} ,
+};
+const unsigned short int gauss_weight = 273;
+
 /////////////
 // Structs //
 /////////////
@@ -166,16 +176,19 @@ void function_copy(const vector<string>& images_paths, const char *path_destinat
 bool can_process_image(const unsigned char image_info[54]){
 
     // Wrong number of planes
-    if (*(short int*)&image_info[26] != 1)
-        return false;
+    if (*(short int*)&image_info[26] != 1){
+        wrong_message("Planes is not 1");
+    }
 
     // Wrong points size
-    if (*(short int*)&image_info[28] != 24)
-        return false;
+    if (*(short int*)&image_info[28] != 24){
+        wrong_message("Points size is not 24");
+    }
 
     // Wrong Compression
-    if (*(int*)&image_info[30] != 0)
-        return false;
+    if (*(int*)&image_info[30] != 0){
+        wrong_message("Image is compressed");
+    }
 
     return true;
 
@@ -260,9 +273,9 @@ void write_images(const vector<bmp_image>& images, const char *path_destination)
         // Write the bmp metadata
         fwrite(image.info, sizeof(unsigned char), 54, image_file);
 
-        int image_width = *(int*)&image.info[18];
-        int row_padded = (image_width*3 + 3) & (~3);
-        int image_height = *(int*)&image.info[22];
+        const int image_width = *(int*)&image.info[18];
+        const int row_padded = (image_width*3 + 3) & (~3);
+        const int image_height = *(int*)&image.info[22];
 
         unsigned char* image_data_row = new unsigned char[row_padded];
 
@@ -288,6 +301,56 @@ void write_images(const vector<bmp_image>& images, const char *path_destination)
 
 }
 
+/// <summary>Calculate the Gauss</summary>
+/// <param name="images_paths">Vector with all images</param>
+/// <returns>bmp_image vector with all BMP Images</returns>
+vector<bmp_image>  function_gauss(vector<bmp_image> images){
+
+    for(bmp_image& image : images){
+        const int image_width = *(int*)&image.info[18];
+        const int image_height = *(int*)&image.info[22];
+
+        for(int i = 0; i < image_height; i += 1){
+            for(int j = 0; j < image_width; j += 1) {
+
+                unsigned int blue = 0;
+                unsigned int green = 0;
+                unsigned int red = 0;
+
+                for(int m_i = -2; m_i <= 2; m_i += 1){
+                    for(int m_j = -2; m_j <= 2; m_j += 1) {
+                        // Control borders
+                        if((i + m_i) < 0 || (i + m_i) >= image_height || (j + m_j) < 0 || (j + m_j) >= image_width ){
+//                            cout << "\t " << i << " - " << j << endl;
+                            blue += gauss_mask[m_i+2][m_j+2] * 0;
+                            green += gauss_mask[m_i+2][m_j+2] * 0;
+                            red += gauss_mask[m_i+2][m_j+2] * 0;
+                        }
+                        else{
+                            blue += gauss_mask[m_i+2][m_j+2] * (unsigned short int)image.data[i + m_i][j + m_j].blue;
+                            green += gauss_mask[m_i+2][m_j+2] * (unsigned short int)image.data[i + m_i][j + m_j].green;
+                            red += gauss_mask[m_i+2][m_j+2] * (unsigned short int)image.data[i + m_i][j + m_j].red;
+                        }
+                    }
+                }
+//                cout << control << endl;
+//                if (blue == 0 || green == 0 || red == 0){
+//                    cout << "" << i << " - " << j << endl;
+//                    cout << "\t " << blue << " - " << green << " - " << red << endl;
+//                }
+
+                image.data[i][j].blue = (unsigned char)(blue/gauss_weight);
+                image.data[i][j].green = (unsigned char)(green/gauss_weight);
+                image.data[i][j].red = (unsigned char)(red/gauss_weight);
+
+            }
+        }
+    }
+
+    return images;
+
+}
+
 /// <summary>Apply gauss function to all images and save them</summary>
 /// <param name="images_paths">Vector with all images paths</param>
 /// <param name="path_destination">Destination path</param>
@@ -295,6 +358,8 @@ void write_images(const vector<bmp_image>& images, const char *path_destination)
 void function_gauss(const vector<string>& images_paths, const char *path_destination){
 
     vector<bmp_image> images = read_images(images_paths);
+
+    images = function_gauss(images);
 
     write_images(images, path_destination);
 
@@ -306,6 +371,9 @@ void function_gauss(const vector<string>& images_paths, const char *path_destina
 int main (int argc, char** argv) {
 
     check_arguments(argc, argv);
+
+    cout << "Input path: " << argv[2] << endl;
+    cout << "Output path: " << argv[3] << endl;
 
     if (strcmp(argv[1],"copy") == 0){
         function_copy(get_images_paths(argv[2]), argv[3]);
