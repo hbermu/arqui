@@ -50,6 +50,7 @@ struct bmp_pixel {
 };
 struct bmp_image {
     string name;
+    string path;
     unsigned char info[54];
     unsigned char* post_info;
     vector <vector<bmp_pixel> > data;
@@ -149,7 +150,7 @@ void check_arguments_paths(const char *path_source, const char *path_destination
 /// <summary>Check arguments</summary>
 /// <param name="argc">Program arguments number</param>
 /// <param name="arguments">Program arguments</param>
-/// <returns></returns>
+/// <returns></returns>get_images_paths
 void check_arguments(int argc, char **argv){
 
     check_arguments_number(argc);
@@ -218,6 +219,7 @@ vector<bmp_image> read_images(const vector<string>& images_paths){
         // Get the file name
         fs::path image_path_filesystem(image_path.c_str());
         image.name = image_path_filesystem.filename().string();
+        image.path = image_path_filesystem.relative_path();
 
         // Read BMP header
         if (fread(image.info, sizeof(unsigned char), 54, image_file) != 54)
@@ -305,8 +307,14 @@ void write_images(const vector<bmp_image>& images, const char *path_destination)
 
         auto time_write = chrono::duration_cast<std::chrono::microseconds>(chrono::high_resolution_clock::now() - t1);
 
+        unsigned int total_time = image.time_read.count() + time_write.count();
+        if(image.time_gauss.count() != 0)
+            total_time += image.time_gauss.count();
+        if(image.time_sobel.count() != 0)
+            total_time += image.time_sobel.count();
+
         // Print times
-        cout << "File: \"" << endl;
+        cout << "File: \"" << image.path << "\"(time : " << total_time << ")" <<endl;
         cout << "  Load time: " << image.time_read.count() << endl;
         if(image.time_gauss.count() != 0)
             cout << "  Gauss time: " << image.time_gauss.count() << endl;
