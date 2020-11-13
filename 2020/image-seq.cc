@@ -1,4 +1,5 @@
 #include <cstring>
+#include <chrono>
 #include <experimental/filesystem>
 #include <iostream>
 #include <string>
@@ -18,13 +19,26 @@ const char *program_functions[3] = {"copy", "gauss", "sobel"};
 
 // Gauss params
 const unsigned short int gauss_mask[5][5] = {
-            {1, 4,  7,  4,  1} ,
-            {4, 16, 26, 16, 4} ,
-            {7, 26, 41, 26, 7} ,
-            {4, 16, 26, 16, 4} ,
-            {1, 4,  7,  4,  1} ,
+        {1, 4,  7,  4,  1} ,
+        {4, 16, 26, 16, 4} ,
+        {7, 26, 41, 26, 7} ,
+        {4, 16, 26, 16, 4} ,
+        {1, 4,  7,  4,  1} ,
 };
 const unsigned short int gauss_weight = 273;
+
+// Sobel params
+const short int sobel_mask_x[3][3] = {
+        { 1,  2,  1} ,
+        { 0,  0,  0} ,
+        {-1, -2, -1}
+};
+const short int sobel_mask_y[3][3] = {
+        {-1,  0,  1} ,
+        {-2,  0,  2} ,
+        {-1,  0,  1}
+};
+const unsigned short int sobel_weight = 8;
 
 /////////////
 // Structs //
@@ -37,8 +51,11 @@ struct bmp_pixel {
 struct bmp_image {
     string name;
     unsigned char info[54];
+    unsigned char* post_info;
     vector <vector<bmp_pixel> > data;
-    vector <unsigned  char> footer;
+    chrono::duration<long, ratio<1, 1000000>> time_read  = chrono::microseconds(0);
+    chrono::duration<long, ratio<1, 1000000>> time_gauss = chrono::microseconds(0);
+    chrono::duration<long, ratio<1, 1000000>> time_sobel = chrono::microseconds(0);
 };
 
 ///////////////
@@ -158,17 +175,6 @@ vector<string> get_images_paths(const char *path){
 
 }
 
-/// <summary>Copy all images from source to destination</summary>
-/// <param name="images_paths">Vector with all images paths</param>
-/// <param name="path_destination">Destination path</param>
-/// /// <returns></returns>
-void function_copy(const vector<string>& images_paths, const char *path_destination){
-
-    for(const string& image_path : images_paths){
-        fs::copy(image_path, path_destination);
-    }
-
-}
 
 /// <summary>Check if BPM can be processed</summary>
 /// <param name="images_paths">Image info</param>
@@ -203,6 +209,7 @@ vector<bmp_image> read_images(const vector<string>& images_paths){
 
     for(const string& image_path : images_paths){
 
+        auto t1 = chrono::high_resolution_clock::now();
         bmp_image image{};
 
         // Open the image (read a binary file: rb)
@@ -222,6 +229,13 @@ vector<bmp_image> read_images(const vector<string>& images_paths){
             int row_padded = (image_width*3 + 3) & (~3);
             int image_height = *(int*)&image.info[22];
 
+            int image_post_header_size = *(int*)&image.info[10] - 54;
+            unsigned  char* image_post_header = new unsigned char[image_post_header_size];
+
+            if (fread(image_post_header, sizeof(unsigned char), image_post_header_size, image_file) != (unsigned)image_post_header_size)
+                exit(-1);
+            image.post_info = image_post_header;
+
             unsigned char* image_data_row = new unsigned char[row_padded];
 
             // Create the image
@@ -240,18 +254,11 @@ vector<bmp_image> read_images(const vector<string>& images_paths){
                 }
                 image.data.push_back(data_line);
             }
-
-            // Read the image footer
-            unsigned char* buffer = new unsigned char[4];
-            while (fread(buffer, 1, 4, image_file) == 4){
-                image.footer.push_back(buffer[0]);
-                image.footer.push_back(buffer[1]);
-                image.footer.push_back(buffer[2]);
-                image.footer.push_back(buffer[3]);
-            }
         }
         // Close the image
         fclose(image_file);
+
+        image.time_read = chrono::duration_cast<std::chrono::microseconds>(chrono::high_resolution_clock::now() - t1);
         images.push_back(image);
     }
 
@@ -266,6 +273,9 @@ vector<bmp_image> read_images(const vector<string>& images_paths){
 void write_images(const vector<bmp_image>& images, const char *path_destination){
 
     for(const bmp_image& image : images){
+
+        auto t1 = chrono::high_resolution_clock::now();
+
         // Open the image (read and write a binary file: rwb)
         string image_path = path_destination + string("/") + image.name;
         FILE* image_file = fopen(image_path.c_str(), "wb");
@@ -277,6 +287,8 @@ void write_images(const vector<bmp_image>& images, const char *path_destination)
         const int row_padded = (image_width*3 + 3) & (~3);
         const int image_height = *(int*)&image.info[22];
 
+        fwrite(image.post_info, sizeof(unsigned char), *(int*)&image.info[10] - 54, image_file);
+
         unsigned char* image_data_row = new unsigned char[row_padded];
 
         for(int i = 0; i < image_height; i += 1){
@@ -285,68 +297,77 @@ void write_images(const vector<bmp_image>& images, const char *path_destination)
                 image_data_row[(j*3) + 1] = image.data[i][j].green;
                 image_data_row[(j*3) + 2] = image.data[i][j].red;
             }
-            // Write the data
+            // Write the row
             fwrite(image_data_row, sizeof(unsigned char), row_padded, image_file);
         }
-        // Write the image footer
-        unsigned char* image_footer = new unsigned char[image.footer.size()];
-        for(int i = 0; i < (int)image.footer.size(); i += 1){
-            image_footer[i] = image.footer[i];
-        }
-        fwrite(image_footer, sizeof(unsigned char), 1, image_file);
-
         // Close the image
         fclose(image_file);
+
+        auto time_write = chrono::duration_cast<std::chrono::microseconds>(chrono::high_resolution_clock::now() - t1);
+
+        // Print times
+        cout << "File: \"" << endl;
+        cout << "  Load time: " << image.time_read.count() << endl;
+        if(image.time_gauss.count() != 0)
+            cout << "  Gauss time: " << image.time_gauss.count() << endl;
+        if(image.time_sobel.count() != 0)
+            cout << "  Sobel time: " << image.time_sobel.count() << endl;
+        cout << "  Store time: " << time_write.count() << endl;
     }
+
+}
+
+/// <summary>Copy all images from source to destination</summary>
+/// <param name="images_paths">Vector with all images paths</param>
+/// <param name="path_destination">Destination path</param>
+/// /// <returns></returns>
+void function_copy(const vector<string>& images_paths, const char *path_destination){
+
+//    for(const string& image_path : images_paths){
+//        fs::copy(image_path, path_destination);
+//    }
+    vector<bmp_image> images = read_images(images_paths);
+
+    write_images(images, path_destination);
 
 }
 
 /// <summary>Calculate the Gauss</summary>
 /// <param name="images_paths">Vector with all images</param>
 /// <returns>bmp_image vector with all BMP Images</returns>
-vector<bmp_image>  function_gauss(vector<bmp_image> images){
+vector<bmp_image>  calculate_function_gauss(vector<bmp_image> images){
 
     for(bmp_image& image : images){
+
+        auto t1 = chrono::high_resolution_clock::now();
+
         const int image_width = *(int*)&image.info[18];
         const int image_height = *(int*)&image.info[22];
 
         for(int i = 0; i < image_height; i += 1){
             for(int j = 0; j < image_width; j += 1) {
 
-                unsigned int blue = 0;
-                unsigned int green = 0;
-                unsigned int red = 0;
+                unsigned short int blue = 0;
+                unsigned short int green = 0;
+                unsigned short int red = 0;
 
                 for(int m_i = -2; m_i <= 2; m_i += 1){
                     for(int m_j = -2; m_j <= 2; m_j += 1) {
                         // Control borders
-                        if((i + m_i) < 0 || (i + m_i) >= image_height || (j + m_j) < 0 || (j + m_j) >= image_width ){
-//                            cout << "\t " << i << " - " << j << endl;
-                            blue += gauss_mask[m_i+2][m_j+2] * 0;
-                            green += gauss_mask[m_i+2][m_j+2] * 0;
-                            red += gauss_mask[m_i+2][m_j+2] * 0;
-                        }
-                        else{
+                        if((i + m_i) >= 0 && (i + m_i) < image_height && (j + m_j) >= 0 && (j + m_j) < image_width ){
                             blue += gauss_mask[m_i+2][m_j+2] * (unsigned short int)image.data[i + m_i][j + m_j].blue;
                             green += gauss_mask[m_i+2][m_j+2] * (unsigned short int)image.data[i + m_i][j + m_j].green;
                             red += gauss_mask[m_i+2][m_j+2] * (unsigned short int)image.data[i + m_i][j + m_j].red;
                         }
                     }
                 }
-//                cout << control << endl;
-//                if (blue == 0 || green == 0 || red == 0){
-//                    cout << "" << i << " - " << j << endl;
-//                    cout << "\t " << blue << " - " << green << " - " << red << endl;
-//                }
-
                 image.data[i][j].blue = (unsigned char)(blue/gauss_weight);
                 image.data[i][j].green = (unsigned char)(green/gauss_weight);
                 image.data[i][j].red = (unsigned char)(red/gauss_weight);
-
             }
         }
+        image.time_gauss = chrono::duration_cast<std::chrono::microseconds>(chrono::high_resolution_clock::now() - t1);
     }
-
     return images;
 
 }
@@ -359,7 +380,70 @@ void function_gauss(const vector<string>& images_paths, const char *path_destina
 
     vector<bmp_image> images = read_images(images_paths);
 
-    images = function_gauss(images);
+    images = calculate_function_gauss(images);
+
+    write_images(images, path_destination);
+
+}
+
+/// <summary>Calculate the Gauss</summary>
+/// <param name="images_paths">Vector with all images</param>
+/// <returns>bmp_image vector with all BMP Images</returns>
+vector<bmp_image>  calculate_function_sobel(vector<bmp_image> images){
+
+    for(bmp_image& image : images){
+
+        auto t1 = chrono::high_resolution_clock::now();
+
+        const int image_width = *(int*)&image.info[18];
+        const int image_height = *(int*)&image.info[22];
+
+        for(int i = 0; i < image_height; i += 1){
+            for(int j = 0; j < image_width; j += 1) {
+
+                int blue_x = 0;
+                int blue_y = 0;
+                int green_x = 0;
+                int green_y = 0;
+                int red_x = 0;
+                int red_y = 0;
+
+                for(int m_i = -1; m_i <= 1; m_i += 1){
+                    for(int m_j = -1; m_j <= 1; m_j += 1) {
+                        // Control borders
+                        if((i + m_i) >= 0 && (i + m_i) < image_height && (j + m_j) >= 0 && (j + m_j) < image_width ){
+                            blue_x += sobel_mask_x[m_i+1][m_j+1] * (unsigned short int)image.data[i + m_i][j + m_j].blue;
+                            blue_y += sobel_mask_y[m_i+1][m_j+1] * (unsigned short int)image.data[i + m_i][j + m_j].blue;
+                            green_x += sobel_mask_x[m_i+1][m_j+1] * (unsigned short int)image.data[i + m_i][j + m_j].green;
+                            green_y += sobel_mask_y[m_i+1][m_j+1] * (unsigned short int)image.data[i + m_i][j + m_j].green;
+                            red_x += sobel_mask_x[m_i+1][m_j+1] * (unsigned short int)image.data[i + m_i][j + m_j].red;
+                            red_y += sobel_mask_y[m_i+1][m_j+1] * (unsigned short int)image.data[i + m_i][j + m_j].red;
+                        }
+                    }
+                }
+                image.data[i][j].blue = (unsigned char)(abs(blue_x/sobel_weight)+abs(blue_y/sobel_weight));
+                image.data[i][j].green = (unsigned char)(abs(green_x/sobel_weight)+abs(green_y/sobel_weight));
+                image.data[i][j].red = (unsigned char)(abs(red_x/sobel_weight)+abs(red_y/sobel_weight));
+            }
+        }
+        image.time_sobel = chrono::duration_cast<std::chrono::microseconds>(chrono::high_resolution_clock::now() - t1);
+    }
+
+    return images;
+
+}
+
+/// <summary>Apply sobel function to all images and save them</summary>
+/// <param name="images_paths">Vector with all images paths</param>
+/// <param name="path_destination">Destination path</param>
+/// <returns></returns>
+void function_sobel(const vector<string>& images_paths, const char *path_destination){
+
+    vector<bmp_image> images = read_images(images_paths);
+
+    images = calculate_function_gauss(images);
+
+    images = calculate_function_sobel(images);
 
     write_images(images, path_destination);
 
@@ -380,6 +464,9 @@ int main (int argc, char** argv) {
     }
     if (strcmp(argv[1],"gauss") == 0){
         function_gauss(get_images_paths(argv[2]), argv[3]);
+    }
+    if (strcmp(argv[1],"sobel") == 0){
+        function_sobel(get_images_paths(argv[2]), argv[3]);
     }
     return 0;
 
