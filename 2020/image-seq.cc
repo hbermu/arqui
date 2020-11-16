@@ -199,7 +199,7 @@ bool can_process_image(const unsigned char image_info[54], const string& image_p
     // Wrong Compression
     if (*(int*)&image_info[30] != 0){
         cout << "File: \"" << image_path << "\"" << endl;
-        cout << "Image is compressed" << endl;
+        cout << "Image compression is not 0" << endl;
         return false;
     }
 
@@ -358,15 +358,15 @@ vector<bmp_image>  calculate_function_gauss(vector<bmp_image> images){
         const int image_width = *(int*)&image.info[18];
         const int image_height = *(int*)&image.info[22];
 
-        for(int i = 0; i < image_height; i += 1){
-            for(int j = 0; j < image_width; j += 1) {
+        for(short int i = 0; i < image_height; i += 1){
+            for(short int j = 0; j < image_width; j += 1) {
 
-                unsigned short int blue = 0;
-                unsigned short int green = 0;
-                unsigned short int red = 0;
+                unsigned int blue = 0;
+                unsigned int green = 0;
+                unsigned int red = 0;
 
-                for(int m_i = -2; m_i <= 2; m_i += 1){
-                    for(int m_j = -2; m_j <= 2; m_j += 1) {
+                for(short int m_i = -2; m_i <= 2; m_i += 1){
+                    for(short int m_j = -2; m_j <= 2; m_j += 1) {
                         // Control borders
                         if((i + m_i) >= 0 && (i + m_i) < image_height && (j + m_j) >= 0 && (j + m_j) < image_width ){
                             blue += gauss_mask[m_i+2][m_j+2] * (unsigned short int)image.data[i + m_i][j + m_j].blue;
@@ -412,8 +412,8 @@ vector<bmp_image>  calculate_function_sobel(vector<bmp_image> images){
         const int image_width = *(int*)&image.info[18];
         const int image_height = *(int*)&image.info[22];
 
-        for(int i = 0; i < image_height; i += 1){
-            for(int j = 0; j < image_width; j += 1) {
+        for(short int i = 0; i < image_height; i += 1){
+            for(short int j = 0; j < image_width; j += 1) {
 
                 int blue_x = 0;
                 int blue_y = 0;
@@ -422,8 +422,8 @@ vector<bmp_image>  calculate_function_sobel(vector<bmp_image> images){
                 int red_x = 0;
                 int red_y = 0;
 
-                for(int m_i = -1; m_i <= 1; m_i += 1){
-                    for(int m_j = -1; m_j <= 1; m_j += 1) {
+                for(short int m_i = -1; m_i <= 1; m_i += 1){
+                    for(short int m_j = -1; m_j <= 1; m_j += 1) {
                         // Control borders
                         if((i + m_i) >= 0 && (i + m_i) < image_height && (j + m_j) >= 0 && (j + m_j) < image_width ){
                             blue_x += sobel_mask_x[m_i+1][m_j+1] * (unsigned short int)image.data[i + m_i][j + m_j].blue;
@@ -435,9 +435,9 @@ vector<bmp_image>  calculate_function_sobel(vector<bmp_image> images){
                         }
                     }
                 }
-                image.data[i][j].blue = (unsigned char)(abs(blue_x/sobel_weight)+abs(blue_y/sobel_weight));
-                image.data[i][j].green = (unsigned char)(abs(green_x/sobel_weight)+abs(green_y/sobel_weight));
-                image.data[i][j].red = (unsigned char)(abs(red_x/sobel_weight)+abs(red_y/sobel_weight));
+                image.data[i][j].blue = (unsigned char)(abs(blue_x/sobel_weight)   +    abs(blue_y/sobel_weight));
+                image.data[i][j].green = (unsigned char)(abs(green_x/sobel_weight) +    abs(green_y/sobel_weight));
+                image.data[i][j].red = (unsigned char)(abs(red_x/sobel_weight)     +    abs(red_y/sobel_weight));
             }
         }
         image.time_sobel = chrono::duration_cast<std::chrono::microseconds>(chrono::high_resolution_clock::now() - t1);
