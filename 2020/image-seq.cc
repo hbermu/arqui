@@ -43,17 +43,14 @@ const unsigned short int sobel_weight = 8;
 /////////////
 // Structs //
 /////////////
-struct bmp_pixel {
-    unsigned char red;
-    unsigned char blue;
-    unsigned char green;
-};
 struct bmp_image {
     string name;
     string path;
     unsigned char info[54];
     unsigned char* post_info;
-    vector <vector<bmp_pixel> > data;
+    vector <unsigned char> red;
+    vector <unsigned char> blue;
+    vector <unsigned char> green;
     chrono::duration<long, ratio<1, 1000000>> time_read  = chrono::microseconds(0);
     chrono::duration<long, ratio<1, 1000000>> time_gauss = chrono::microseconds(0);
     chrono::duration<long, ratio<1, 1000000>> time_sobel = chrono::microseconds(0);
@@ -251,16 +248,12 @@ vector<bmp_image> read_images(const vector<string>& images_paths){
                 // Read a image row
                 if (fread(image_data_row, sizeof(unsigned char), row_padded, image_file) != (unsigned)row_padded)
                     exit(-1);
-                vector<bmp_pixel> data_line;
                 for(int j = 0; j < image_width*3; j += 3){
                     // B - G - R
-                    bmp_pixel pixel{};
-                    pixel.blue = image_data_row[j];
-                    pixel.green = image_data_row[j + 1];
-                    pixel.red = image_data_row[j + 2];
-                    data_line.push_back(pixel);
+                    image.blue.push_back(image_data_row[j]);
+                    image.green.push_back(image_data_row[j + 1]);
+                    image.red.push_back(image_data_row[j + 2]);
                 }
-                image.data.push_back(data_line);
             }
             // Close the image
             fclose(image_file);
@@ -284,7 +277,7 @@ void write_images(const vector<bmp_image>& images, const char *path_destination)
 
         auto t1 = chrono::high_resolution_clock::now();
 
-        // Open the image (read and write a binary file: rwb)
+        // Open the image (read and write a binary file: wb)
         string image_path = path_destination + string("/") + image.name;
         FILE* image_file = fopen(image_path.c_str(), "wb");
 
@@ -301,9 +294,9 @@ void write_images(const vector<bmp_image>& images, const char *path_destination)
 
         for(int i = 0; i < image_height; i += 1){
             for(int j = 0; j < image_width; j += 1){
-                image_data_row[(j*3)] = image.data[i][j].blue;
-                image_data_row[(j*3) + 1] = image.data[i][j].green;
-                image_data_row[(j*3) + 2] = image.data[i][j].red;
+                image_data_row[(j*3)] = image.blue[(i*image_width) + j];
+                image_data_row[(j*3) + 1] = image.green[(i*image_width) + j];
+                image_data_row[(j*3) + 2] = image.red[(i*image_width) + j];
             }
             // Write the row
             fwrite(image_data_row, sizeof(unsigned char), row_padded, image_file);
@@ -369,15 +362,15 @@ vector<bmp_image>  calculate_function_gauss(vector<bmp_image> images){
                     for(short int m_j = -2; m_j <= 2; m_j += 1) {
                         // Control borders
                         if((i + m_i) >= 0 && (i + m_i) < image_height && (j + m_j) >= 0 && (j + m_j) < image_width ){
-                            blue += gauss_mask[m_i+2][m_j+2] * (unsigned short int)image.data[i + m_i][j + m_j].blue;
-                            green += gauss_mask[m_i+2][m_j+2] * (unsigned short int)image.data[i + m_i][j + m_j].green;
-                            red += gauss_mask[m_i+2][m_j+2] * (unsigned short int)image.data[i + m_i][j + m_j].red;
+                            blue += gauss_mask[m_i+2][m_j+2] * (unsigned short int)image.blue[((i+m_i)*image_width) + (j+m_j)];
+                            green += gauss_mask[m_i+2][m_j+2] * (unsigned short int)image.green[((i+m_i)*image_width) + (j+m_j)];
+                            red += gauss_mask[m_i+2][m_j+2] * (unsigned short int)image.red[((i+m_i)*image_width) + (j+m_j)];
                         }
                     }
                 }
-                image.data[i][j].blue = (unsigned char)(blue/gauss_weight);
-                image.data[i][j].green = (unsigned char)(green/gauss_weight);
-                image.data[i][j].red = (unsigned char)(red/gauss_weight);
+                image.blue[(i*image_width) + j] = (unsigned char)(blue/gauss_weight);
+                image.green[(i*image_width) + j] = (unsigned char)(green/gauss_weight);
+                image.red[(i*image_width) + j] = (unsigned char)(red/gauss_weight);
             }
         }
         image.time_gauss = chrono::duration_cast<std::chrono::microseconds>(chrono::high_resolution_clock::now() - t1);
@@ -426,18 +419,18 @@ vector<bmp_image>  calculate_function_sobel(vector<bmp_image> images){
                     for(short int m_j = -1; m_j <= 1; m_j += 1) {
                         // Control borders
                         if((i + m_i) >= 0 && (i + m_i) < image_height && (j + m_j) >= 0 && (j + m_j) < image_width ){
-                            blue_x += sobel_mask_x[m_i+1][m_j+1] * (unsigned short int)image.data[i + m_i][j + m_j].blue;
-                            blue_y += sobel_mask_y[m_i+1][m_j+1] * (unsigned short int)image.data[i + m_i][j + m_j].blue;
-                            green_x += sobel_mask_x[m_i+1][m_j+1] * (unsigned short int)image.data[i + m_i][j + m_j].green;
-                            green_y += sobel_mask_y[m_i+1][m_j+1] * (unsigned short int)image.data[i + m_i][j + m_j].green;
-                            red_x += sobel_mask_x[m_i+1][m_j+1] * (unsigned short int)image.data[i + m_i][j + m_j].red;
-                            red_y += sobel_mask_y[m_i+1][m_j+1] * (unsigned short int)image.data[i + m_i][j + m_j].red;
+                            blue_x += sobel_mask_x[m_i+1][m_j+1] * (unsigned short int)image.blue[((i+m_i)*image_width) + (j+m_j)];
+                            blue_y += sobel_mask_y[m_i+1][m_j+1] * (unsigned short int)image.blue[((i+m_i)*image_width) + (j+m_j)];
+                            green_x += sobel_mask_x[m_i+1][m_j+1] * (unsigned short int)image.green[((i+m_i)*image_width) + (j+m_j)];
+                            green_y += sobel_mask_y[m_i+1][m_j+1] * (unsigned short int)image.green[((i+m_i)*image_width) + (j+m_j)];
+                            red_x += sobel_mask_x[m_i+1][m_j+1] * (unsigned short int)image.red[((i+m_i)*image_width) + (j+m_j)];
+                            red_y += sobel_mask_y[m_i+1][m_j+1] * (unsigned short int)image.red[((i+m_i)*image_width) + (j+m_j)];
                         }
                     }
                 }
-                image.data[i][j].blue = (unsigned char)(abs(blue_x/sobel_weight)   +    abs(blue_y/sobel_weight));
-                image.data[i][j].green = (unsigned char)(abs(green_x/sobel_weight) +    abs(green_y/sobel_weight));
-                image.data[i][j].red = (unsigned char)(abs(red_x/sobel_weight)     +    abs(red_y/sobel_weight));
+                image.blue[(i*image_width) + j]  = (unsigned char)((abs(blue_x)  + abs(blue_y))/sobel_weight);
+                image.green[(i*image_width) + j] = (unsigned char)((abs(green_x) + abs(green_y))/sobel_weight);
+                image.red[(i*image_width) + j]   = (unsigned char)((abs(red_x)   + abs(red_y))/sobel_weight);
             }
         }
         image.time_sobel = chrono::duration_cast<std::chrono::microseconds>(chrono::high_resolution_clock::now() - t1);
