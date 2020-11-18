@@ -426,15 +426,15 @@ vector<bmp_image>  calculate_function_sobel(vector<bmp_image> images){
                         }
                     }
                 }
-                int blue = ((abs(blue_x)  + abs(blue_y))/sobel_weight);
+                unsigned int blue = ((abs(blue_x)  + abs(blue_y))/sobel_weight);
                 if (blue > 255)
                     blue = 255;
                 image.blue[(i*image_width) + j]  = (unsigned char)blue;
-                int green = ((abs(green_x)  + abs(green_y))/sobel_weight);
+                unsigned int green = ((abs(green_x)  + abs(green_y))/sobel_weight);
                 if (green > 255)
                     green = 255;
                 image.green[(i*image_width) + j] = (unsigned char)green;
-                int red = ((abs(red_x)  + abs(red_y))/sobel_weight);
+                unsigned int red = ((abs(red_x)  + abs(red_y))/sobel_weight);
                 if (red > 255)
                     red = 255;
                 image.red[(i*image_width) + j]   = (unsigned char)red;
