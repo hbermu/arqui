@@ -32,7 +32,7 @@
   <component name="ChangeListManager">
     <list default="true" id="6b4e45a9-80f0-435e-9a57-e819ae730b7c" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/image-seq.cc" beforeDir="false" afterPath="$PROJECT_DIR$/image-seq.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Get_times_seq.sh" beforeDir="false" afterPath="$PROJECT_DIR$/Get_times_seq.sh" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -186,7 +186,7 @@
       <workItem from="1605553598830" duration="4059000" />
       <workItem from="1605633159028" duration="854000" />
       <workItem from="1605650623286" duration="460000" />
-      <workItem from="1605714156055" duration="7471000" />
+      <workItem from="1605714156055" duration="7965000" />
     </task>
     <servers />
   </component>
