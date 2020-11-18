@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 #include <sys/stat.h>
+#include <cmath>
 
 using namespace std;
 namespace fs = experimental::filesystem;
@@ -28,12 +29,12 @@ const unsigned short int gauss_mask[5][5] = {
 const unsigned short int gauss_weight = 273;
 
 // Sobel params
-const short int sobel_mask_x[3][3] = {
-        { 1,  2,  1} ,
-        { 0,  0,  0} ,
-        {-1, -2, -1}
-};
 const short int sobel_mask_y[3][3] = {
+        {-1, -2, -1} ,
+        { 0,  0,  0} ,
+        { 1,  2,  1}
+};
+const short int sobel_mask_x[3][3] = {
         {-1,  0,  1} ,
         {-2,  0,  2} ,
         {-1,  0,  1}
@@ -235,13 +236,13 @@ vector<bmp_image> read_images(const vector<string>& images_paths){
             int image_height = *(int*)&image.info[22];
 
             int image_post_header_size = *(int*)&image.info[10] - 54;
-            unsigned  char* image_post_header = new unsigned char[image_post_header_size];
+            auto* image_post_header = new unsigned char[image_post_header_size];
 
             if (fread(image_post_header, sizeof(unsigned char), image_post_header_size, image_file) != (unsigned)image_post_header_size)
                 exit(-1);
             image.post_info = image_post_header;
 
-            unsigned char* image_data_row = new unsigned char[row_padded];
+            auto* image_data_row = new unsigned char[row_padded];
 
             // Create the image
             for(int i = 0; i < image_height; i += 1){
@@ -290,7 +291,7 @@ void write_images(const vector<bmp_image>& images, const char *path_destination)
 
         fwrite(image.post_info, sizeof(unsigned char), *(int*)&image.info[10] - 54, image_file);
 
-        unsigned char* image_data_row = new unsigned char[row_padded];
+        auto* image_data_row = new unsigned char[row_padded];
 
         for(int i = 0; i < image_height; i += 1){
             for(int j = 0; j < image_width; j += 1){
@@ -330,9 +331,6 @@ void write_images(const vector<bmp_image>& images, const char *path_destination)
 /// /// <returns></returns>
 void function_copy(const vector<string>& images_paths, const char *path_destination){
 
-//    for(const string& image_path : images_paths){
-//        fs::copy(image_path, path_destination);
-//    }
     vector<bmp_image> images = read_images(images_paths);
 
     write_images(images, path_destination);
@@ -415,22 +413,32 @@ vector<bmp_image>  calculate_function_sobel(vector<bmp_image> images){
                 int red_x = 0;
                 int red_y = 0;
 
-                for(short int m_i = -1; m_i <= 1; m_i += 1){
-                    for(short int m_j = -1; m_j <= 1; m_j += 1) {
+                for(short int m_i = 0; m_i <= 2; m_i += 1){
+                    for(short int m_j = 0; m_j <= 2; m_j += 1) {
                         // Control borders
                         if((i + m_i) >= 0 && (i + m_i) < image_height && (j + m_j) >= 0 && (j + m_j) < image_width ){
-                            blue_x += sobel_mask_x[m_i+1][m_j+1] * (unsigned short int)image.blue[((i+m_i)*image_width) + (j+m_j)];
-                            blue_y += sobel_mask_y[m_i+1][m_j+1] * (unsigned short int)image.blue[((i+m_i)*image_width) + (j+m_j)];
-                            green_x += sobel_mask_x[m_i+1][m_j+1] * (unsigned short int)image.green[((i+m_i)*image_width) + (j+m_j)];
-                            green_y += sobel_mask_y[m_i+1][m_j+1] * (unsigned short int)image.green[((i+m_i)*image_width) + (j+m_j)];
-                            red_x += sobel_mask_x[m_i+1][m_j+1] * (unsigned short int)image.red[((i+m_i)*image_width) + (j+m_j)];
-                            red_y += sobel_mask_y[m_i+1][m_j+1] * (unsigned short int)image.red[((i+m_i)*image_width) + (j+m_j)];
+                            blue_x += sobel_mask_x[m_i][m_j] * (short int)image.blue[((i+m_i)*image_width) + (j+m_j)];
+                            blue_y += sobel_mask_y[m_i][m_j] * (short int)image.blue[((i+m_i)*image_width) + (j+m_j)];
+                            green_x += sobel_mask_x[m_i][m_j] * (short int)image.green[((i+m_i)*image_width) + (j+m_j)];
+                            green_y += sobel_mask_y[m_i][m_j] * (short int)image.green[((i+m_i)*image_width) + (j+m_j)];
+                            red_x += sobel_mask_x[m_i][m_j] * (short int)image.red[((i+m_i)*image_width) + (j+m_j)];
+                            red_y += sobel_mask_y[m_i][m_j] * (short int)image.red[((i+m_i)*image_width) + (j+m_j)];
                         }
                     }
                 }
-                image.blue[(i*image_width) + j]  = (unsigned char)((abs(blue_x)  + abs(blue_y))/sobel_weight);
-                image.green[(i*image_width) + j] = (unsigned char)((abs(green_x) + abs(green_y))/sobel_weight);
-                image.red[(i*image_width) + j]   = (unsigned char)((abs(red_x)   + abs(red_y))/sobel_weight);
+                int blue = ((abs(blue_x)  + abs(blue_y))/sobel_weight);
+                if (blue > 255)
+                    blue = 255;
+                image.blue[(i*image_width) + j]  = (unsigned char)blue;
+                int green = ((abs(green_x)  + abs(green_y))/sobel_weight);
+                if (green > 255)
+                    green = 255;
+                image.green[(i*image_width) + j] = (unsigned char)green;
+                int red = ((abs(red_x)  + abs(red_y))/sobel_weight);
+                if (red > 255)
+                    red = 255;
+                image.red[(i*image_width) + j]   = (unsigned char)red;
+
             }
         }
         image.time_sobel = chrono::duration_cast<std::chrono::microseconds>(chrono::high_resolution_clock::now() - t1);
