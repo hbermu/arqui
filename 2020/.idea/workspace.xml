@@ -31,8 +31,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6b4e45a9-80f0-435e-9a57-e819ae730b7c" name="Default Changelist" comment="">
+      <change afterPath="$PROJECT_DIR$/image-par.cc" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Get_times_seq.sh" beforeDir="false" afterPath="$PROJECT_DIR$/Get_times_seq.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/makefile" beforeDir="false" afterPath="$PROJECT_DIR$/makefile" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -100,15 +101,15 @@
     <property name="settings.editor.selected.configurable" value="preferences.keymap" />
   </component>
   <component name="RecentsManager">
-    <key name="CopyFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$" />
-      <recent name="$PROJECT_DIR$/images_destination_sobel" />
-      <recent name="$PROJECT_DIR$/images_destination_gauss" />
-    </key>
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/images_destination_gauss" />
       <recent name="$PROJECT_DIR$/images_source" />
       <recent name="$PROJECT_DIR$/images_destination" />
+    </key>
+    <key name="CopyFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$" />
+      <recent name="$PROJECT_DIR$/images_destination_sobel" />
+      <recent name="$PROJECT_DIR$/images_destination_gauss" />
     </key>
   </component>
   <component name="RunManager" selected="Makefile Application.sobel">
@@ -132,9 +133,9 @@
         <option name="CLION.COMPOUND.BUILD" enabled="true" />
       </method>
     </configuration>
-    <configuration default="true" type="GradleAppRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true">
+    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
-        <option name="com.jetbrains.cidr.cpp.gradle.execution.GradleNativeBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
     <configuration name="GenerateImagesTests.sh" type="ShConfigurationType" temporary="true">
@@ -187,6 +188,7 @@
       <workItem from="1605633159028" duration="854000" />
       <workItem from="1605650623286" duration="460000" />
       <workItem from="1605714156055" duration="7965000" />
+      <workItem from="1605880802782" duration="601000" />
     </task>
     <servers />
   </component>
@@ -214,10 +216,11 @@
     </state>
     <state x="660" y="241" key="#com.intellij.execution.impl.EditConfigurationsDialog/35.27.1885.1053@35.27.1885.1053" timestamp="1604931817899" />
     <state x="663" y="236" key="#com.intellij.execution.impl.EditConfigurationsDialog/40.27.1880.1053@40.27.1880.1053" timestamp="1605275194567" />
-    <state x="672" y="354" width="600" height="396" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1605556889396">
-      <screen x="35" y="27" width="1885" height="1053" />
+    <state x="675" y="339" width="605" height="424" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1605880896244">
+      <screen x="40" y="27" width="1880" height="1053" />
     </state>
     <state x="672" y="354" width="600" height="396" key="#com.intellij.fileTypes.FileTypeChooser/35.27.1885.1053@35.27.1885.1053" timestamp="1605556889396" />
+    <state x="675" y="339" width="605" height="424" key="#com.intellij.fileTypes.FileTypeChooser/40.27.1880.1053@40.27.1880.1053" timestamp="1605880896244" />
     <state x="922" y="285" width="424" height="484" key="FileChooserDialogImpl" timestamp="1604915451929">
       <screen x="35" y="27" width="1885" height="1053" />
     </state>

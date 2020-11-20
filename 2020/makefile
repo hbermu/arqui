@@ -13,5 +13,7 @@ image-seq: $(OBJ)-seq.cc
 image-seq-nop: $(OBJ)-seq.cc
 	$(CC) -o $(OBJ)-seq-nop $(OBJ)-seq.cc $(CFLAGS) $(CFLAGSNOP)
 
+image-par: $(OBJ)-par.cc
+	$(CC) -o $(OBJ)-par $(OBJ)-par.cc $(CFLAGS) $(CFLAGSOP) -fopenmp
 clean:
 	rm -f image-seq image-seq-nop images_destination/*.bmp
