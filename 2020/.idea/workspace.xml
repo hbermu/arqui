@@ -22,17 +22,26 @@
     <select />
   </component>
   <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
-    <generated />
+    <generated>
+      <config projectName="2020" targetName="image-seq-nop" />
+      <config projectName="2020" targetName="image-seq" />
+      <config projectName="2020" targetName="all" />
+      <config projectName="2020" targetName="image-par" />
+    </generated>
   </component>
   <component name="CMakeSettings">
     <configurations>
-      <configuration PROFILE_NAME="Debug" CONFIG_NAME="Debug" />
+      <configuration PROFILE_NAME="Debug" CONFIG_NAME="Debug" ENABLED="true" />
     </configurations>
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6b4e45a9-80f0-435e-9a57-e819ae730b7c" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/image-par.cc" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/Get_times_par.sh" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/image-par.cc" beforeDir="false" afterPath="$PROJECT_DIR$/image-par.cc" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/images_destination_gauss/.gitignore" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/images_destination_sobel/.gitignore" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/makefile" beforeDir="false" afterPath="$PROJECT_DIR$/makefile" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -98,44 +107,58 @@
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
     <property name="nodejs_package_manager_path" value="npm" />
-    <property name="settings.editor.selected.configurable" value="preferences.keymap" />
+    <property name="settings.editor.selected.configurable" value="dynamic.analysis.tools.valgrind" />
   </component>
   <component name="RecentsManager">
-    <key name="MoveFile.RECENT_KEYS">
-      <recent name="$PROJECT_DIR$/images_destination_gauss" />
-      <recent name="$PROJECT_DIR$/images_source" />
-      <recent name="$PROJECT_DIR$/images_destination" />
-    </key>
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$" />
       <recent name="$PROJECT_DIR$/images_destination_sobel" />
       <recent name="$PROJECT_DIR$/images_destination_gauss" />
     </key>
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/images_destination_gauss" />
+      <recent name="$PROJECT_DIR$/images_source" />
+      <recent name="$PROJECT_DIR$/images_destination" />
+    </key>
   </component>
-  <component name="RunManager" selected="Makefile Application.sobel">
-    <configuration default="true" type="CLionNativeAppRunConfigurationType" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="2020" TARGET_NAME="image-seq" CONFIG_NAME="image-seq" version="1">
+  <component name="RunManager" selected="Makefile Application.sobel-par">
+    <configuration default="true" type="CLionNativeAppRunConfigurationType" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="2020" TARGET_NAME="image-seq" CONFIG_NAME="image-seq" version="1">
       <method v="2">
         <option name="CLION.COMPOUND.BUILD" enabled="true" />
       </method>
     </configuration>
-    <configuration name="copy" type="CLionNativeAppRunConfigurationType" singleton="false" PROGRAM_PARAMS="copy ./images_source ./images_destination" REDIRECT_INPUT="false" WORKING_DIR="file://$PROJECT_DIR$" PASS_PARENT_ENVS_2="true" PROJECT_NAME="2020" TARGET_NAME="all" CONFIG_NAME="all" version="1" RUN_PATH="$PROJECT_DIR$/image-seq">
+    <configuration name="copy" type="CLionNativeAppRunConfigurationType" singleton="false" PROGRAM_PARAMS="copy ./images_source ./images_destination" REDIRECT_INPUT="false" ELEVATE="false" WORKING_DIR="file://$PROJECT_DIR$" PASS_PARENT_ENVS_2="true" PROJECT_NAME="2020" TARGET_NAME="all" CONFIG_NAME="all" version="1" RUN_PATH="$PROJECT_DIR$/image-seq">
       <method v="2">
         <option name="CLION.COMPOUND.BUILD" enabled="true" />
       </method>
     </configuration>
-    <configuration name="gauss" type="CLionNativeAppRunConfigurationType" singleton="false" PROGRAM_PARAMS="gauss ./images_source ./images_destination" REDIRECT_INPUT="false" WORKING_DIR="file://$PROJECT_DIR$" PASS_PARENT_ENVS_2="true" PROJECT_NAME="2020" TARGET_NAME="all" CONFIG_NAME="all" version="1" RUN_PATH="$PROJECT_DIR$/image-seq">
+    <configuration name="gauss" type="CLionNativeAppRunConfigurationType" singleton="false" PROGRAM_PARAMS="gauss ./images_source ./images_destination" REDIRECT_INPUT="false" ELEVATE="false" WORKING_DIR="file://$PROJECT_DIR$" PASS_PARENT_ENVS_2="true" PROJECT_NAME="2020" TARGET_NAME="all" CONFIG_NAME="all" version="1" RUN_PATH="$PROJECT_DIR$/image-seq">
       <method v="2">
         <option name="CLION.COMPOUND.BUILD" enabled="true" />
       </method>
     </configuration>
-    <configuration name="sobel" type="CLionNativeAppRunConfigurationType" singleton="false" PROGRAM_PARAMS="sobel ./images_source ./images_destination" REDIRECT_INPUT="false" WORKING_DIR="file://$PROJECT_DIR$" PASS_PARENT_ENVS_2="true" PROJECT_NAME="2020" TARGET_NAME="all" CONFIG_NAME="all" version="1" RUN_PATH="$PROJECT_DIR$/image-seq">
+    <configuration name="sobel-par" type="CLionNativeAppRunConfigurationType" singleton="false" PROGRAM_PARAMS="sobel ./images_source ./images_destination" REDIRECT_INPUT="false" ELEVATE="false" WORKING_DIR="file://$PROJECT_DIR$" PASS_PARENT_ENVS_2="true" PROJECT_NAME="2020" TARGET_NAME="all" CONFIG_NAME="all" version="1" RUN_PATH="$PROJECT_DIR$/image-par">
+      <envs>
+        <env name="OMP_NUM_THREADS" value="4" />
+        <env name="OMP_SCHEDULE" value="static" />
+      </envs>
       <method v="2">
         <option name="CLION.COMPOUND.BUILD" enabled="true" />
       </method>
     </configuration>
-    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" PASS_PARENT_ENVS_2="true">
+    <configuration name="sobel" type="CLionNativeAppRunConfigurationType" singleton="false" PROGRAM_PARAMS="sobel ./images_source ./images_destination" REDIRECT_INPUT="false" ELEVATE="false" WORKING_DIR="file://$PROJECT_DIR$" PASS_PARENT_ENVS_2="true" PROJECT_NAME="2020" TARGET_NAME="all" CONFIG_NAME="all" version="1" RUN_PATH="$PROJECT_DIR$/image-seq">
+      <method v="2">
+        <option name="CLION.COMPOUND.BUILD" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
+    <configuration default="true" type="GradleAppRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="com.jetbrains.cidr.cpp.gradle.execution.GradleNativeBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
     <configuration name="GenerateImagesTests.sh" type="ShConfigurationType" temporary="true">
@@ -147,12 +170,15 @@
       <option name="INDEPENDENT_INTERPRETER_PATH" value="true" />
       <option name="INTERPRETER_PATH" value="/usr/bin/zsh" />
       <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="EXECUTE_IN_TERMINAL" value="true" />
+      <envs />
       <method v="2" />
     </configuration>
     <list>
       <item itemvalue="Makefile Application.copy" />
       <item itemvalue="Makefile Application.gauss" />
       <item itemvalue="Makefile Application.sobel" />
+      <item itemvalue="Makefile Application.sobel-par" />
       <item itemvalue="Shell Script.GenerateImagesTests.sh" />
     </list>
     <recent_temporary>
@@ -189,6 +215,7 @@
       <workItem from="1605650623286" duration="460000" />
       <workItem from="1605714156055" duration="7965000" />
       <workItem from="1605880802782" duration="601000" />
+      <workItem from="1607006944283" duration="3419000" />
     </task>
     <servers />
   </component>
@@ -209,74 +236,5 @@
       </map>
     </option>
     <option name="oldMeFiltersMigrated" value="true" />
-  </component>
-  <component name="WindowStateProjectService">
-    <state x="663" y="236" key="#com.intellij.execution.impl.EditConfigurationsDialog" timestamp="1605275194567">
-      <screen x="40" y="27" width="1880" height="1053" />
-    </state>
-    <state x="660" y="241" key="#com.intellij.execution.impl.EditConfigurationsDialog/35.27.1885.1053@35.27.1885.1053" timestamp="1604931817899" />
-    <state x="663" y="236" key="#com.intellij.execution.impl.EditConfigurationsDialog/40.27.1880.1053@40.27.1880.1053" timestamp="1605275194567" />
-    <state x="675" y="339" width="605" height="424" key="#com.intellij.fileTypes.FileTypeChooser" timestamp="1605880896244">
-      <screen x="40" y="27" width="1880" height="1053" />
-    </state>
-    <state x="672" y="354" width="600" height="396" key="#com.intellij.fileTypes.FileTypeChooser/35.27.1885.1053@35.27.1885.1053" timestamp="1605556889396" />
-    <state x="675" y="339" width="605" height="424" key="#com.intellij.fileTypes.FileTypeChooser/40.27.1880.1053@40.27.1880.1053" timestamp="1605880896244" />
-    <state x="922" y="285" width="424" height="484" key="FileChooserDialogImpl" timestamp="1604915451929">
-      <screen x="35" y="27" width="1885" height="1053" />
-    </state>
-    <state x="922" y="285" width="424" height="484" key="FileChooserDialogImpl/35.27.1885.1053@35.27.1885.1053" timestamp="1604915451929" />
-    <state width="1839" height="164" key="GridCell.Tab.0.bottom" timestamp="1605720825502">
-      <screen x="35" y="27" width="1885" height="1053" />
-    </state>
-    <state width="1839" height="164" key="GridCell.Tab.0.bottom/35.27.1885.1053@35.27.1885.1053" timestamp="1605720825502" />
-    <state width="1834" height="184" key="GridCell.Tab.0.bottom/40.27.1880.1053@40.27.1880.1053" timestamp="1605282533658" />
-    <state width="1839" height="164" key="GridCell.Tab.0.center" timestamp="1605720825501">
-      <screen x="35" y="27" width="1885" height="1053" />
-    </state>
-    <state width="1839" height="164" key="GridCell.Tab.0.center/35.27.1885.1053@35.27.1885.1053" timestamp="1605720825501" />
-    <state width="1834" height="184" key="GridCell.Tab.0.center/40.27.1880.1053@40.27.1880.1053" timestamp="1605282533655" />
-    <state width="1839" height="164" key="GridCell.Tab.0.left" timestamp="1605720825500">
-      <screen x="35" y="27" width="1885" height="1053" />
-    </state>
-    <state width="1839" height="164" key="GridCell.Tab.0.left/35.27.1885.1053@35.27.1885.1053" timestamp="1605720825500" />
-    <state width="1834" height="184" key="GridCell.Tab.0.left/40.27.1880.1053@40.27.1880.1053" timestamp="1605282533654" />
-    <state width="1839" height="164" key="GridCell.Tab.0.right" timestamp="1605720825501">
-      <screen x="35" y="27" width="1885" height="1053" />
-    </state>
-    <state width="1839" height="164" key="GridCell.Tab.0.right/35.27.1885.1053@35.27.1885.1053" timestamp="1605720825501" />
-    <state width="1834" height="184" key="GridCell.Tab.0.right/40.27.1880.1053@40.27.1880.1053" timestamp="1605282533657" />
-    <state width="1354" height="322" key="GridCell.Tab.1.bottom" timestamp="1604564951930">
-      <screen x="35" y="27" width="1885" height="1053" />
-    </state>
-    <state width="1354" height="322" key="GridCell.Tab.1.bottom/35.27.1885.1053@35.27.1885.1053" timestamp="1604564951930" />
-    <state width="1354" height="322" key="GridCell.Tab.1.center" timestamp="1604564951930">
-      <screen x="35" y="27" width="1885" height="1053" />
-    </state>
-    <state width="1354" height="322" key="GridCell.Tab.1.center/35.27.1885.1053@35.27.1885.1053" timestamp="1604564951930" />
-    <state width="1354" height="322" key="GridCell.Tab.1.left" timestamp="1604564951930">
-      <screen x="35" y="27" width="1885" height="1053" />
-    </state>
-    <state width="1354" height="322" key="GridCell.Tab.1.left/35.27.1885.1053@35.27.1885.1053" timestamp="1604564951930" />
-    <state width="1354" height="322" key="GridCell.Tab.1.right" timestamp="1604564951930">
-      <screen x="35" y="27" width="1885" height="1053" />
-    </state>
-    <state width="1354" height="322" key="GridCell.Tab.1.right/35.27.1885.1053@35.27.1885.1053" timestamp="1604564951930" />
-    <state x="470" y="183" width="1016" height="742" key="SettingsEditor" timestamp="1605275391987">
-      <screen x="40" y="27" width="1880" height="1053" />
-    </state>
-    <state x="466" y="188" key="SettingsEditor/35.27.1885.1053@35.27.1885.1053" timestamp="1604915583854" />
-    <state x="470" y="183" width="1016" height="742" key="SettingsEditor/40.27.1880.1053@40.27.1880.1053" timestamp="1605275391987" />
-    <state x="587" y="166" width="770" height="773" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser" timestamp="1605718018006">
-      <screen x="35" y="27" width="1885" height="1053" />
-    </state>
-    <state x="587" y="166" width="770" height="773" key="com.intellij.openapi.editor.actions.MultiplePasteAction$ClipboardContentChooser/35.27.1885.1053@35.27.1885.1053" timestamp="1605718018006" />
-    <state x="758" y="467" width="428" height="170" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2" timestamp="1604834050850">
-      <screen x="35" y="27" width="1885" height="1053" />
-    </state>
-    <state x="758" y="467" width="428" height="170" key="com.intellij.openapi.vcs.update.UpdateOrStatusOptionsDialogupdate-v2/35.27.1885.1053@35.27.1885.1053" timestamp="1604834050850" />
-    <state x="414" y="457" width="1126" height="210" key="makefile.clean.confirm.dialog" timestamp="1604560244803">
-      <screen x="35" y="27" width="1885" height="1053" />
-    </state>
-    <state x="414" y="457" width="1126" height="210" key="makefile.clean.confirm.dialog/35.27.1885.1053@35.27.1885.1053" timestamp="1604560244803" />
   </component>
 </project>

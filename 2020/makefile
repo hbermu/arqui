@@ -1,6 +1,6 @@
 # Arq Makefile
 
-all: clean image-seq image-seq-nop
+all: clean image-seq image-seq-nop image-par
 
 CC=g++
 CFLAGS=-std=c++17 -Wall -Wextra -Wno-deprecated -Werror -pedantic -pedantic-errors -lstdc++fs
@@ -16,4 +16,4 @@ image-seq-nop: $(OBJ)-seq.cc
 image-par: $(OBJ)-par.cc
 	$(CC) -o $(OBJ)-par $(OBJ)-par.cc $(CFLAGS) $(CFLAGSOP) -fopenmp
 clean:
-	rm -f image-seq image-seq-nop images_destination/*.bmp
+	rm -f image-seq image-seq-nop image-par images_destination/*.bmp

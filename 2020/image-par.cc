@@ -68,7 +68,7 @@ void wrong_message(const char *message){
 
     cout << message << "\n"
          << "  " << name_program << " operation in_path out_path:\n"
-            << "    operation: copy, gauss, sobel\n";
+         << "    operation: copy, gauss, sobel\n";
     exit(-1);
 
 }
@@ -91,6 +91,8 @@ void check_arguments_number(int argc){
 void check_arguments_function_name(const char *function){
 
     bool right_function = false;
+    // const int functionsSize = (sizeof(program_functions)/sizeof(program_functions[0]));
+    // for(int i = 0; i < functionsSize; i++){
     for(auto & program_function : program_functions){
         if (strcmp(function, program_function) == 0){
             right_function = true;
@@ -210,16 +212,17 @@ vector<bmp_image> read_images(const vector<string>& images_paths){
 
     vector<bmp_image> images;
 
-    for(const string& image_path : images_paths){
+    for(int image_index = 0; image_index < (int)images_paths.size(); image_index += 1){
+//    for(const string& image_path : images_paths){
 
         auto t1 = chrono::high_resolution_clock::now();
         bmp_image image{};
 
         // Open the image (read a binary file: rb)
-        FILE* image_file = fopen(image_path.c_str(), "rb");
+        FILE* image_file = fopen(images_paths[image_index].c_str(), "rb");
 
         // Get the file name
-        fs::path image_path_filesystem(image_path.c_str());
+        fs::path image_path_filesystem(images_paths[image_index].c_str());
         image.name = image_path_filesystem.filename().string();
         image.path = image_path_filesystem.relative_path();
 
@@ -228,7 +231,7 @@ vector<bmp_image> read_images(const vector<string>& images_paths){
             exit(-1);
 
         // If the image can be processes
-        if (can_process_image(image.info,image_path)){
+        if (can_process_image(image.info,images_paths[image_index])){
             int image_width = *(int*)&image.info[18];
             int row_padded = (image_width*3 + 3) & (~3);
             int image_height = *(int*)&image.info[22];
@@ -272,30 +275,31 @@ vector<bmp_image> read_images(const vector<string>& images_paths){
 /// <returns></returns>
 void write_images(const vector<bmp_image>& images, const char *path_destination){
 
-    for(const bmp_image& image : images){
+    for(int image_index = 0; image_index < (int)images.size(); image_index += 1){
+//    for(const bmp_image& image : images){
 
         auto t1 = chrono::high_resolution_clock::now();
 
         // Open the image (read and write a binary file: wb)
-        string image_path = path_destination + string("/") + image.name;
+        string image_path = path_destination + string("/") + images[image_index].name;
         FILE* image_file = fopen(image_path.c_str(), "wb");
 
         // Write the bmp metadata
-        fwrite(image.info, sizeof(unsigned char), 54, image_file);
+        fwrite(images[image_index].info, sizeof(unsigned char), 54, image_file);
 
-        const int image_width = *(int*)&image.info[18];
+        const int image_width = *(int*)&images[image_index].info[18];
         const int row_padded = (image_width*3 + 3) & (~3);
-        const int image_height = *(int*)&image.info[22];
+        const int image_height = *(int*)&images[image_index].info[22];
 
-        fwrite(image.post_info, sizeof(unsigned char), *(int*)&image.info[10] - 54, image_file);
+        fwrite(images[image_index].post_info, sizeof(unsigned char), *(int*)&images[image_index].info[10] - 54, image_file);
 
         auto* image_data_row = new unsigned char[row_padded];
 
         for(int i = 0; i < image_height; i += 1){
             for(int j = 0; j < image_width; j += 1){
-                image_data_row[(j*3)] = image.blue[(i*image_width) + j];
-                image_data_row[(j*3) + 1] = image.green[(i*image_width) + j];
-                image_data_row[(j*3) + 2] = image.red[(i*image_width) + j];
+                image_data_row[(j*3)] = images[image_index].blue[(i*image_width) + j];
+                image_data_row[(j*3) + 1] = images[image_index].green[(i*image_width) + j];
+                image_data_row[(j*3) + 2] = images[image_index].red[(i*image_width) + j];
             }
             // Write the row
             fwrite(image_data_row, sizeof(unsigned char), row_padded, image_file);
@@ -305,19 +309,19 @@ void write_images(const vector<bmp_image>& images, const char *path_destination)
 
         auto time_write = chrono::duration_cast<std::chrono::microseconds>(chrono::high_resolution_clock::now() - t1);
 
-        unsigned int total_time = image.time_read.count() + time_write.count();
-        if(image.time_gauss.count() != 0)
-            total_time += image.time_gauss.count();
-        if(image.time_sobel.count() != 0)
-            total_time += image.time_sobel.count();
+        unsigned int total_time = images[image_index].time_read.count() + time_write.count();
+        if(images[image_index].time_gauss.count() != 0)
+            total_time += images[image_index].time_gauss.count();
+        if(images[image_index].time_sobel.count() != 0)
+            total_time += images[image_index].time_sobel.count();
 
         // Print times
-        cout << "File: \"" << image.path << "\"(time: " << total_time << ")" <<endl;
-        cout << "  Load time: " << image.time_read.count() << endl;
-        if(image.time_gauss.count() != 0)
-            cout << "  Gauss time: " << image.time_gauss.count() << endl;
-        if(image.time_sobel.count() != 0)
-            cout << "  Sobel time: " << image.time_sobel.count() << endl;
+        cout << "File: \"" << images[image_index].path << "\"(time: " << total_time << ")" <<endl;
+        cout << "  Load time: " << images[image_index].time_read.count() << endl;
+        if(images[image_index].time_gauss.count() != 0)
+            cout << "  Gauss time: " << images[image_index].time_gauss.count() << endl;
+        if(images[image_index].time_sobel.count() != 0)
+            cout << "  Sobel time: " << images[image_index].time_sobel.count() << endl;
         cout << "  Store time: " << time_write.count() << endl;
     }
 
@@ -347,6 +351,7 @@ vector<bmp_image>  calculate_function_gauss(vector<bmp_image> images){
         const int image_width = *(int*)&image.info[18];
         const int image_height = *(int*)&image.info[22];
 
+#pragma omp parallel for collapse(2)
         for(short int i = 0; i < image_height; i += 1){
             for(short int j = 0; j < image_width; j += 1) {
 
@@ -401,6 +406,7 @@ vector<bmp_image>  calculate_function_sobel(vector<bmp_image> images){
         const int image_width = *(int*)&image.info[18];
         const int image_height = *(int*)&image.info[22];
 
+#pragma omp parallel for collapse(2)
         for(short int i = 0; i < image_height; i += 1){
             for(short int j = 0; j < image_width; j += 1) {
 
