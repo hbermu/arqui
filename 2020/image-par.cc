@@ -351,9 +351,11 @@ vector<bmp_image>  calculate_function_gauss(vector<bmp_image> images){
         const int image_width = *(int*)&image.info[18];
         const int image_height = *(int*)&image.info[22];
 
-#pragma omp parallel for collapse(2)
+        #pragma omp parallel for collapse(2)
         for(short int i = 0; i < image_height; i += 1){
             for(short int j = 0; j < image_width; j += 1) {
+
+                cout << image_height << endl;
 
                 unsigned int blue = 0;
                 unsigned int green = 0;
@@ -406,7 +408,7 @@ vector<bmp_image>  calculate_function_sobel(vector<bmp_image> images){
         const int image_width = *(int*)&image.info[18];
         const int image_height = *(int*)&image.info[22];
 
-#pragma omp parallel for collapse(2)
+        #pragma omp parallel for collapse(2)
         for(short int i = 0; i < image_height; i += 1){
             for(short int j = 0; j < image_width; j += 1) {
 

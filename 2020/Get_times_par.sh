@@ -2,6 +2,9 @@
 
 make all
 
+export OMP_NESTED=true
+export OMP_MAX_ACTIVE_LEVELS=2
+
 echo "### Par 4 static"
 export OMP_SCHEDULE=static
 export OMP_NUM_THREADS=4

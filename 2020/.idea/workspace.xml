@@ -36,13 +36,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="6b4e45a9-80f0-435e-9a57-e819ae730b7c" name="Default Changelist" comment="">
-      <change afterPath="$PROJECT_DIR$/Get_times_par.sh" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Get_times_par.sh" beforeDir="false" afterPath="$PROJECT_DIR$/Get_times_par.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/image-par.cc" beforeDir="false" afterPath="$PROJECT_DIR$/image-par.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/images_destination_gauss/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/images_destination_sobel/.gitignore" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/makefile" beforeDir="false" afterPath="$PROJECT_DIR$/makefile" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -141,6 +137,8 @@
       <envs>
         <env name="OMP_NUM_THREADS" value="4" />
         <env name="OMP_SCHEDULE" value="static" />
+        <env name="OMP_NESTED" value="true" />
+        <env name="OMP_MAX_ACTIVE_LEVELS" value="2" />
       </envs>
       <method v="2">
         <option name="CLION.COMPOUND.BUILD" enabled="true" />
@@ -215,7 +213,7 @@
       <workItem from="1605650623286" duration="460000" />
       <workItem from="1605714156055" duration="7965000" />
       <workItem from="1605880802782" duration="601000" />
-      <workItem from="1607006944283" duration="3419000" />
+      <workItem from="1607006944283" duration="5402000" />
     </task>
     <servers />
   </component>
