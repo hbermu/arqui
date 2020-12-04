@@ -319,13 +319,20 @@ void write_images(const vector<bmp_image>& images, const char *path_destination)
             total_time += images[image_index].time_sobel.count();
 
         // Print times
-        cout << "File: \"" << images[image_index].path << "\"(time: " << total_time << ")" <<endl;
-        cout << "  Load time: " << images[image_index].time_read.count() << endl;
+//        cout << "File: \"" << images[image_index].path << "\"(time: " << total_time << ")" <<endl;
+//        cout << "  Load time: " << images[image_index].time_read.count() << endl;
+        string message = string("File: \"") + images[image_index].path.c_str() + string("\"(time: ")
+                + to_string(total_time) + string("\n")
+                + string("  Load time: ") + to_string((int)images[image_index].time_read.count()) + string("\n");
+
+
         if(images[image_index].time_gauss.count() != 0)
-            cout << "  Gauss time: " << images[image_index].time_gauss.count() << endl;
+            message += string("  Gauss time: ") + to_string((int)images[image_index].time_gauss.count()) + string("\n");
+//            cout << "  Gauss time: " << images[image_index].time_gauss.count() << endl;
         if(images[image_index].time_sobel.count() != 0)
-            cout << "  Sobel time: " << images[image_index].time_sobel.count() << endl;
-        cout << "  Store time: " << time_write.count() << endl;
+            message += string("  Sobel time: ") + to_string((int)images[image_index].time_sobel.count()) + string("\n");
+//            cout << "  Sobel time: " << images[image_index].time_sobel.count() << endl;
+        cout << message << "  Store time: " << time_write.count() << endl;
     }
 
 }
