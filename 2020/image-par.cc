@@ -275,6 +275,7 @@ vector<bmp_image> read_images(const vector<string>& images_paths){
 /// <returns></returns>
 void write_images(const vector<bmp_image>& images, const char *path_destination){
 
+    #pragma omp parallel for
     for(int image_index = 0; image_index < (int)images.size(); image_index += 1){
 //    for(const bmp_image& image : images){
 
@@ -355,7 +356,7 @@ vector<bmp_image>  calculate_function_gauss(vector<bmp_image> images){
         vector <unsigned char> vec_green((int)image.green.size());
         vector <unsigned char> vec_red((int)image.red.size());
 
-        #pragma omp parallel for //collapse(2)
+        #pragma omp parallel for
         for(short int i = 0; i < image_height; i += 1){
             for(short int j = 0; j < image_width; j += 1) {
 
@@ -419,7 +420,7 @@ vector<bmp_image>  calculate_function_sobel(vector<bmp_image> images){
         vector <unsigned char> vec_green((int)image.green.size());
         vector <unsigned char> vec_red((int)image.red.size());
 
-        #pragma omp parallel for //collapse(2)
+        #pragma omp parallel for
         for(short int i = 0; i < image_height; i += 1){
             for(short int j = 0; j < image_width; j += 1) {
 

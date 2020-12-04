@@ -23,10 +23,10 @@
   </component>
   <component name="CMakeRunConfigurationManager" shouldGenerate="true" shouldDeleteObsolete="true">
     <generated>
-      <config projectName="2020" targetName="image-seq-nop" />
       <config projectName="2020" targetName="image-seq" />
-      <config projectName="2020" targetName="all" />
       <config projectName="2020" targetName="image-par" />
+      <config projectName="2020" targetName="all" />
+      <config projectName="2020" targetName="image-seq-nop" />
     </generated>
   </component>
   <component name="CMakeSettings">
@@ -38,7 +38,6 @@
     <list default="true" id="6b4e45a9-80f0-435e-9a57-e819ae730b7c" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/image-par.cc" beforeDir="false" afterPath="$PROJECT_DIR$/image-par.cc" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/image-seq.cc" beforeDir="false" afterPath="$PROJECT_DIR$/image-seq.cc" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -118,7 +117,7 @@
       <recent name="$PROJECT_DIR$/images_destination" />
     </key>
   </component>
-  <component name="RunManager" selected="Makefile Application.sobel">
+  <component name="RunManager" selected="Makefile Application.sobel-par">
     <configuration default="true" type="CLionNativeAppRunConfigurationType" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true" PROJECT_NAME="2020" TARGET_NAME="image-seq" CONFIG_NAME="image-seq" version="1">
       <method v="2">
         <option name="CLION.COMPOUND.BUILD" enabled="true" />
@@ -139,7 +138,7 @@
         <env name="OMP_NUM_THREADS" value="4" />
         <env name="OMP_SCHEDULE" value="static" />
         <env name="OMP_NESTED" value="true" />
-        <env name="OMP_MAX_ACTIVE_LEVELS" value="2" />
+        <env name="OMP_MAX_ACTIVE_LEVELS" value="4" />
       </envs>
       <method v="2">
         <option name="CLION.COMPOUND.BUILD" enabled="true" />
@@ -148,11 +147,6 @@
     <configuration name="sobel" type="CLionNativeAppRunConfigurationType" singleton="false" PROGRAM_PARAMS="sobel ./images_source ./images_destination" REDIRECT_INPUT="false" ELEVATE="false" WORKING_DIR="file://$PROJECT_DIR$" PASS_PARENT_ENVS_2="true" PROJECT_NAME="2020" TARGET_NAME="all" CONFIG_NAME="all" version="1" RUN_PATH="$PROJECT_DIR$/image-seq">
       <method v="2">
         <option name="CLION.COMPOUND.BUILD" enabled="true" />
-      </method>
-    </configuration>
-    <configuration default="true" type="GradleAppRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true">
-      <method v="2">
-        <option name="com.jetbrains.cidr.cpp.gradle.execution.GradleNativeBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
     <configuration name="GenerateImagesTests.sh" type="ShConfigurationType" temporary="true">
@@ -210,7 +204,8 @@
       <workItem from="1605714156055" duration="7965000" />
       <workItem from="1605880802782" duration="601000" />
       <workItem from="1607006944283" duration="5402000" />
-      <workItem from="1607067330281" duration="2040000" />
+      <workItem from="1607067330281" duration="6397000" />
+      <workItem from="1607099878424" duration="1840000" />
     </task>
     <servers />
   </component>
