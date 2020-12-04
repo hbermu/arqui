@@ -349,6 +349,11 @@ vector<bmp_image>  calculate_function_gauss(vector<bmp_image> images){
         const int image_width = *(int*)&image.info[18];
         const int image_height = *(int*)&image.info[22];
 
+        vector <unsigned char> vec_blue((int)image.blue.size());
+        vector <unsigned char> vec_green((int)image.green.size());
+        vector <unsigned char> vec_red((int)image.red.size());
+
+//        #pragma omp parallel for //collapse(2)
         for(short int i = 0; i < image_height; i += 1){
             for(short int j = 0; j < image_width; j += 1) {
 
@@ -366,11 +371,16 @@ vector<bmp_image>  calculate_function_gauss(vector<bmp_image> images){
                         }
                     }
                 }
-                image.blue[(i*image_width) + j] = (unsigned char)(blue/gauss_weight);
-                image.green[(i*image_width) + j] = (unsigned char)(green/gauss_weight);
-                image.red[(i*image_width) + j] = (unsigned char)(red/gauss_weight);
+                vec_blue[(i*image_width) + j] = (unsigned char)(blue/gauss_weight);
+                vec_green[(i*image_width) + j] = (unsigned char)(green/gauss_weight);
+                vec_red[(i*image_width) + j] = (unsigned char)(red/gauss_weight);
             }
         }
+
+        image.blue = vec_blue;
+        image.green = vec_green;
+        image.red = vec_red;
+
         image.time_gauss = chrono::duration_cast<std::chrono::microseconds>(chrono::high_resolution_clock::now() - t1);
     }
     return images;
@@ -403,6 +413,11 @@ vector<bmp_image>  calculate_function_sobel(vector<bmp_image> images){
         const int image_width = *(int*)&image.info[18];
         const int image_height = *(int*)&image.info[22];
 
+        vector <unsigned char> vec_blue((int)image.blue.size());
+        vector <unsigned char> vec_green((int)image.green.size());
+        vector <unsigned char> vec_red((int)image.red.size());
+
+//        #pragma omp parallel for //collapse(2)
         for(short int i = 0; i < image_height; i += 1){
             for(short int j = 0; j < image_width; j += 1) {
 
@@ -429,24 +444,30 @@ vector<bmp_image>  calculate_function_sobel(vector<bmp_image> images){
                 unsigned int blue = ((abs(blue_x)  + abs(blue_y))/sobel_weight);
                 if (blue > 255)
                     blue = 255;
-                image.blue[(i*image_width) + j]  = (unsigned char)blue;
+                vec_blue[(i*image_width) + j]  = (unsigned char)blue;
                 unsigned int green = ((abs(green_x)  + abs(green_y))/sobel_weight);
                 if (green > 255)
                     green = 255;
-                image.green[(i*image_width) + j] = (unsigned char)green;
+                vec_green[(i*image_width) + j] = (unsigned char)green;
                 unsigned int red = ((abs(red_x)  + abs(red_y))/sobel_weight);
                 if (red > 255)
                     red = 255;
-                image.red[(i*image_width) + j]   = (unsigned char)red;
+                vec_red[(i*image_width) + j]   = (unsigned char)red;
 
             }
         }
+
+        image.blue = vec_blue;
+        image.green = vec_green;
+        image.red = vec_red;
+
         image.time_sobel = chrono::duration_cast<std::chrono::microseconds>(chrono::high_resolution_clock::now() - t1);
     }
 
     return images;
 
 }
+
 
 /// <summary>Apply sobel function to all images and save them</summary>
 /// <param name="images_paths">Vector with all images paths</param>
