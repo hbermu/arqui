@@ -91,10 +91,12 @@ void check_arguments_number(int argc){
 void check_arguments_function_name(const char *function){
 
     bool right_function = false;
-    // const int functionsSize = (sizeof(program_functions)/sizeof(program_functions[0]));
-    // for(int i = 0; i < functionsSize; i++){
-    for(auto & program_function : program_functions){
-        if (strcmp(function, program_function) == 0){
+    const int functionsSize = (sizeof(program_functions)/sizeof(program_functions[0]));
+
+    #pragma omp parallel for
+    for(int i = 0; i < functionsSize; i++){
+//    for(auto & program_function : program_functions){
+        if (strcmp(function, program_functions[i]) == 0){
             right_function = true;
         }
     }
