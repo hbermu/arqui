@@ -37,6 +37,8 @@
   <component name="ChangeListManager">
     <list default="true" id="6b4e45a9-80f0-435e-9a57-e819ae730b7c" name="Default Changelist" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Enunciado.pdf" beforeDir="false" afterPath="$PROJECT_DIR$/Enunciado.pdf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Get_times_par.sh" beforeDir="false" afterPath="$PROJECT_DIR$/Get_times_par-plani.sh" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/image-par.cc" beforeDir="false" afterPath="$PROJECT_DIR$/image-par.cc" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -149,6 +151,11 @@
         <option name="CLION.COMPOUND.BUILD" enabled="true" />
       </method>
     </configuration>
+    <configuration default="true" type="GradleAppRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="com.jetbrains.cidr.cpp.gradle.execution.GradleNativeBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="GenerateImagesTests.sh" type="ShConfigurationType" temporary="true">
       <option name="INDEPENDENT_SCRIPT_PATH" value="true" />
       <option name="SCRIPT_PATH" value="$PROJECT_DIR$/GenerateImagesTests.sh" />
@@ -206,7 +213,8 @@
       <workItem from="1607006944283" duration="5402000" />
       <workItem from="1607067330281" duration="6397000" />
       <workItem from="1607099878424" duration="2903000" />
-      <workItem from="1607102950170" duration="1038000" />
+      <workItem from="1607102950170" duration="3305000" />
+      <workItem from="1607333397931" duration="797000" />
     </task>
     <servers />
   </component>

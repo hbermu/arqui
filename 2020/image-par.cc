@@ -277,6 +277,8 @@ vector<bmp_image> read_images(const vector<string>& images_paths){
 /// <returns></returns>
 void write_images(const vector<bmp_image>& images, const char *path_destination){
 
+    vector<string> logs((int)images.size());
+
     #pragma omp parallel for
     for(int image_index = 0; image_index < (int)images.size(); image_index += 1){
 //    for(const bmp_image& image : images){
@@ -319,21 +321,21 @@ void write_images(const vector<bmp_image>& images, const char *path_destination)
             total_time += images[image_index].time_sobel.count();
 
         // Print times
-//        cout << "File: \"" << images[image_index].path << "\"(time: " << total_time << ")" <<endl;
-//        cout << "  Load time: " << images[image_index].time_read.count() << endl;
         string message = string("File: \"") + images[image_index].path.c_str() + string("\"(time: ")
-                + to_string(total_time) + string("\n")
+                + to_string(total_time) + string(")\n")
                 + string("  Load time: ") + to_string((int)images[image_index].time_read.count()) + string("\n");
-
 
         if(images[image_index].time_gauss.count() != 0)
             message += string("  Gauss time: ") + to_string((int)images[image_index].time_gauss.count()) + string("\n");
-//            cout << "  Gauss time: " << images[image_index].time_gauss.count() << endl;
         if(images[image_index].time_sobel.count() != 0)
             message += string("  Sobel time: ") + to_string((int)images[image_index].time_sobel.count()) + string("\n");
-//            cout << "  Sobel time: " << images[image_index].time_sobel.count() << endl;
-        cout << message << "  Store time: " << time_write.count() << endl;
+        message += string("  Store time: ") + to_string((int)time_write.count()) + string("\n");
+
+        logs[image_index] = message;
     }
+
+    for(const string& log : logs)
+        cout << log;
 
 }
 
